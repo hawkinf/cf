@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Consultor Financeiro Pro v2.17</title>
+    <title>Consultor Financeiro Pro v2.18</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -134,15 +134,46 @@
         .radio-group label { margin: 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
         input[type="radio"] { width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
 
-        /* --- CALCULADORA --- */
+        /* --- CALCULADORA TAPE --- */
         .calc-container { max-width: 400px; margin: 0 auto; }
-        .calc-display {
-            width: 100%; height: 90px; background-color: #F8FAFC; border: 2px solid #E2E8F0;
-            border-radius: 10px; text-align: right; padding: 15px; font-size: 32px;
-            color: var(--text-main); margin-bottom: 15px; font-family: 'Courier New', Courier, monospace;
-            font-weight: bold; overflow: hidden; display: flex; align-items: center; justify-content: flex-end;
-            word-break: break-all; letter-spacing: -1px;
+        
+        .calc-screen {
+            background-color: #F8FAFC; border: 2px solid #E2E8F0;
+            border-radius: 12px; margin-bottom: 15px;
+            display: flex; flex-direction: column;
+            justify-content: flex-end;
+            height: 180px; /* Altura maior para caber historico */
+            padding: 15px;
+            overflow: hidden;
         }
+
+        .calc-tape {
+            flex: 1;
+            overflow-y: auto;
+            display: flex; flex-direction: column;
+            justify-content: flex-end; /* Itens no rodapé do histórico */
+            align-items: flex-end;
+            color: var(--text-sub);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 14px;
+            padding-bottom: 10px;
+            margin-bottom: 5px;
+            border-bottom: 1px dashed #CBD5E1;
+        }
+
+        .calc-tape-row { width: 100%; text-align: right; margin-bottom: 4px; }
+        .calc-tape-row span { font-weight: bold; color: var(--text-main); }
+
+        .calc-current {
+            text-align: right;
+            font-size: 36px;
+            color: var(--text-main);
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            word-break: break-all;
+            line-height: 1.1;
+        }
+
         .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
         .calc-btn {
             padding: 20px; font-size: 22px; border-radius: 10px; border: none; cursor: pointer;
@@ -208,7 +239,7 @@
             <i class="fas fa-calculator"></i> <span>Calculadora</span>
         </button>
     </nav>
-    <div class="footer">v2.17 PWA</div>
+    <div class="footer">v2.18 PWA</div>
 </aside>
 
 <main>
@@ -414,7 +445,12 @@
             <h1><i class="fas fa-calculator"></i> Calculadora</h1>
         </div>
         <div class="calc-container">
-            <div id="calc-display" class="calc-display">0</div>
+            <div class="calc-screen">
+                <div id="calc-tape" class="calc-tape">
+                    </div>
+                <div id="calc-current" class="calc-current">0</div>
+            </div>
+
             <div class="calc-grid">
                 <button class="calc-btn cl" onclick="calcBasic.clear()">C</button>
                 <button class="calc-btn op" onclick="calcBasic.append('/')">÷</button>
@@ -439,6 +475,7 @@
                 <button class="calc-btn" onclick="calcBasic.append('0')" style="grid-column: span 2;">0</button>
                 <button class="calc-btn eq" onclick="calcBasic.calculate()">=</button>
             </div>
+            
             <button class="btn-secondary" style="margin-top: 15px;" onclick="calcBasic.copyToClipboard()"><i class="fas fa-copy"></i> Copiar Resultado</button>
         </div>
     </div>
@@ -450,7 +487,7 @@
         window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
     }
 
-    /* --- MÁSCARAS E UTILS --- */
+    /* --- UTILS --- */
     function parseMoney(val) {
         if (!val) return 0;
         let clean = val.replace(/\D/g, '');
@@ -476,7 +513,6 @@
         else if (v.length >= 3) input.value = `${v.slice(0,2)}/${v.slice(2)}`;
         else input.value = v;
     }
-    
     function formatPercentage(input) {
         let val = input.value.replace(',', '.');
         val = val.replace(/[^0-9.]/g, '');
@@ -486,12 +522,10 @@
         input.value = floatVal.toFixed(2).replace('.', ',');
         if(input.id === 'f_i') finan.calc();
     }
-
     function maskFloat(input) {
         let v = input.value.replace(/[^0-9,.]/g, '');
         input.value = v;
     }
-
     function parseDate(str) {
         const parts = str.split('/');
         return new Date(parts[2], parts[1] - 1, parts[0]);
@@ -518,9 +552,7 @@
         showPage: (id) => {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            
             document.getElementById(id).classList.add('active');
-            
             const navs = document.querySelectorAll('nav button');
             if(id === 'cartao') navs[0].classList.add('active');
             if(id === 'financiamento') navs[1].classList.add('active');
@@ -530,7 +562,7 @@
         }
     };
 
-    /* --- CARTAO LOGIC --- */
+    /* --- CARTAO --- */
     const cartao = {
         limpar: () => {
             document.getElementById('c_compra').value = '';
@@ -547,47 +579,37 @@
         },
         maskDesc: (input) => {
             const tipo = document.getElementById('c_tipo_desc').value;
-            if (tipo === '%') {
-                maskFloat(input); 
-            } else maskMoney(input);
+            if (tipo === '%') maskFloat(input); else maskMoney(input);
         },
         formatDesc: (input) => {
             const tipo = document.getElementById('c_tipo_desc').value;
-            if (tipo === '%') {
-                formatPercentage(input);
-                cartao.calcular();
-            }
+            if (tipo === '%') { formatPercentage(input); cartao.calcular(); }
         },
         calcular: () => {
             const compra = parseMoney(document.getElementById('c_compra').value);
             const tipo = document.getElementById('c_tipo_desc').value;
             let descStr = document.getElementById('c_desconto').value;
             let pix = 0, descVal = 0;
-
             if (tipo === '%') {
                 descVal = parseFloatBr(descStr);
                 pix = compra * (1 - descVal / 100);
             } else {
                 descVal = parseMoney(descStr);
-                if (tipo === 'R$ Desc.') pix = compra - descVal;
-                else pix = descVal;
+                if (tipo === 'R$ Desc.') pix = compra - descVal; else pix = descVal;
             }
             if (pix < 0) pix = 0;
-
             let qtd = parseInt(document.getElementById('c_parc').value) || 1;
             if (qtd < 1) qtd = 1;
             const parc = compra / qtd;
-
             document.getElementById('c_res_pix').innerText = formatMoney(pix);
             document.getElementById('c_res_parc').innerText = formatMoney(parc);
-
             let taxa = 0;
             if (pix > 0 && parc > 0 && qtd > 1) taxa = (Math.pow((parc * qtd) / pix, 1 / qtd) - 1) * 100;
             document.getElementById('c_res_taxa').innerText = taxa.toFixed(4).replace('.', ',') + ' %';
         }
     };
 
-    /* --- FINANCIAMENTO LOGIC --- */
+    /* --- FINANCIAMENTO --- */
     const finan = {
         limpar: () => {
             document.getElementById('f_pv').value = '';
@@ -599,19 +621,12 @@
         updateState: () => {
             const target = document.querySelector('input[name="f_target"]:checked').value;
             const fields = ['f_pv', 'f_n', 'f_pmt', 'f_i'];
-            
             fields.forEach(id => {
                 const el = document.getElementById(id);
-                el.disabled = false;
-                el.classList.remove('calculating');
-                
+                el.disabled = false; el.classList.remove('calculating');
                 if (id.includes(target)) {
-                    el.value = 'Calculando...';
-                    el.disabled = true;
-                    el.classList.add('calculating');
-                } else {
-                    if (el.value === 'Calculando...') el.value = '';
-                }
+                    el.value = 'Calculando...'; el.disabled = true; el.classList.add('calculating');
+                } else { if (el.value === 'Calculando...') el.value = ''; }
             });
             finan.calc();
         },
@@ -622,10 +637,8 @@
                 if (id === 'f_i') return parseFloatBr(document.getElementById(id).value) / 100;
                 return parseMoney(document.getElementById(id).value);
             };
-
             let pv = getVal('f_pv'), n = getVal('f_n'), pmt = getVal('f_pmt'), i = getVal('f_i');
             let res = 0;
-
             try {
                 if (target === 'pmt' && i !== 0 && n > 0) res = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
                 else if (target === 'pv' && i !== 0 && n > 0) res = pmt * (Math.pow(1 + i, n) - 1) / (i * Math.pow(1 + i, n));
@@ -638,12 +651,10 @@
                     }
                     res = ((low+high)/2) * 100;
                 }
-
                 const resEl = document.getElementById('f_' + target);
                 if (res > 0) {
                     if (target === 'i') resEl.value = res.toFixed(2).replace('.', ',');
                     else resEl.value = formatMoney(res);
-                    
                     let total = 0;
                     if(n > 0) {
                         if(pmt > 0) total = pmt * n;
@@ -651,14 +662,12 @@
                         else if(target === 'pv') total = pmt * n;
                     }
                     document.getElementById('f_res_total').innerText = 'Total Pago: ' + formatMoney(total);
-                } else {
-                   document.getElementById('f_res_total').innerText = 'Total Pago: R$ 0,00';
-                }
+                } else { document.getElementById('f_res_total').innerText = 'Total Pago: R$ 0,00'; }
             } catch (e) {}
         }
     };
 
-    /* --- EMPRESTIMO LOGIC --- */
+    /* --- EMPRESTIMO --- */
     const emprestimo = {
         limpar: () => {
             document.getElementById('e_capital').value = '';
@@ -671,24 +680,18 @@
         gerar: () => {
             const tbody = document.querySelector('#e_tabela tbody');
             tbody.innerHTML = '';
-
             const capital = parseMoney(document.getElementById('e_capital').value);
             const n = parseInt(document.getElementById('e_n').value) || 0;
             const taxa = parseFloatBr(document.getElementById('e_taxa').value) / 100;
             const metodo = document.getElementById('e_metodo').value;
-            
             const dtCtr = new Date(); dtCtr.setHours(0,0,0,0);
             let dtPriStr = document.getElementById('e_dt_primeira').value;
             if (dtPriStr.length < 10) { alert('Data inválida'); return; }
             const dtPri = parseDate(dtPriStr);
-
             if (!capital || !n) return;
-
             let saldo = capital;
             const amortSAC = capital / n;
             let idx = 1;
-
-            // FASE 1: CARÊNCIA
             let refAnterior = new Date(dtCtr);
             while (true) {
                 let limitDate = new Date(dtPri); limitDate.setDate(limitDate.getDate() - 5);
@@ -697,27 +700,21 @@
                     if (dtPri.getDate() >= dtCtr.getDate()) proxMes.setDate(dtPri.getDate());
                     else { proxMes.setMonth(proxMes.getMonth() + 1); proxMes.setDate(dtPri.getDate()); }
                 } else proxMes.setMonth(proxMes.getMonth() + 1);
-
                 if (proxMes < limitDate && proxMes > refAnterior) {
                     const diffTime = Math.abs(proxMes - refAnterior);
                     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
                     const juros = saldo * (taxa / 30 * diffDays);
                     emprestimo.addRow(idx, formatDate(proxMes), juros, 0, juros, saldo, true);
-                    idx++;
-                    refAnterior = new Date(proxMes);
+                    idx++; refAnterior = new Date(proxMes);
                 } else break;
             }
-
-            // FASE 2: AMORTIZAÇÃO
             let currentDate = new Date(dtPri);
             let diffDaysFinal = Math.ceil(Math.abs(currentDate - refAnterior) / (1000 * 60 * 60 * 24));
             let taxaPrimeiraParcela = taxa;
             if (diffDaysFinal > 35 || diffDaysFinal < 25) taxaPrimeiraParcela = (taxa / 30 * diffDaysFinal);
-
             for (let i = 1; i <= n; i++) {
                 let juros = saldo * (i === 1 ? taxaPrimeiraParcela : taxa);
                 let amort = 0, prest = 0;
-
                 if (metodo === 'SAC') { amort = amortSAC; prest = amort + juros; } 
                 else {
                     if (taxa > 0) prest = capital * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1);
@@ -739,7 +736,7 @@
         }
     };
 
-    /* --- INDICES LOGIC --- */
+    /* --- INDICES --- */
     const indices = {
         limpar: () => {
             document.getElementById('i_media').innerText = '...';
@@ -752,17 +749,14 @@
             const btn = document.querySelector('#indices .btn-primary');
             const originalText = btn.innerText;
             btn.innerText = 'Buscando...'; btn.disabled = true;
-
             const codigo = document.getElementById('i_indicador').value;
             const nome = document.getElementById('i_indicador').options[document.getElementById('i_indicador').selectedIndex].text;
             let meses = parseInt(document.getElementById('i_meses').value) || 12;
-
             const hoje = new Date();
             const dtIni = new Date(); dtIni.setDate(hoje.getDate() - (meses * 32));
             const sIni = formatDate(dtIni); const sFim = formatDate(hoje);
             const bcbUrl = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json&dataInicial=${sIni}&dataFinal=${sFim}`;
             const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(bcbUrl)}`;
-
             try {
                 const resp = await fetch(proxyUrl);
                 if (!resp.ok) throw new Error('Erro API');
@@ -776,14 +770,12 @@
             const simbolo = isDolar ? 'R$ ' : ''; const suffix = isDolar ? '' : '%';
             const tbody = document.querySelector('#i_tabela tbody');
             let vals = [];
-
             dados.forEach(d => {
                 const val = parseFloat(d.valor); vals.push(val);
                 const tr = document.createElement('tr');
                 tr.innerHTML = `<td>${d.data}</td><td style="text-align: right; font-weight: bold;">${simbolo}${val.toFixed(4).replace('.', ',')}${suffix}</td>`;
                 tbody.appendChild(tr);
             });
-
             if (vals.length > 0) {
                 const media = vals.reduce((a,b)=>a+b,0)/vals.length;
                 const maxVal = Math.max(...vals);
@@ -802,17 +794,18 @@
         }
     };
 
-    /* --- CALCULADORA BASICA (Com formatação Milhar/Decimal) --- */
+    /* --- CALCULADORA (TAPE + FORMAT) --- */
     const calcBasic = {
-        display: document.getElementById('calc-display'),
+        displayCurrent: document.getElementById('calc-current'),
+        tape: document.getElementById('calc-tape'),
         current: '0',
         
-        // Formata visualmente o número mantendo a virgula
         formatDisplay: (valStr) => {
             if(valStr === 'Erro') return 'Erro';
-            // Regex para encontrar números na expressão
+            // Formata números mantendo operadores
             return valStr.replace(/([0-9,]+)/g, (match) => {
                 let parts = match.split(',');
+                // Formata milhar no inteiro
                 let intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
                 let decPart = parts.length > 1 ? ',' + parts[1] : '';
                 return intPart + decPart;
@@ -820,41 +813,86 @@
         },
 
         update: () => {
-            document.getElementById('calc-display').innerText = calcBasic.formatDisplay(calcBasic.current);
+            calcBasic.displayCurrent.innerText = calcBasic.formatDisplay(calcBasic.current);
         },
+        
         append: (val) => {
-            // Se for ponto (tecla virgula), usamos virgula na visualização
+            // Traduz ponto para virgula visualmente se vier de teclado físico, mas aqui botões mandam '.'
+            // A lógica interna usa '.' para decimal se for operador JS, mas visual usa ','
+            // Vamos manter INTERNO = '.' para operadores e ',' para visualização
+            // Simplificação: Current guarda "10,5" visualmente
+            
             let char = val === '.' ? ',' : val;
             
+            // Evita virgula duplicada no mesmo numero
+            if (char === ',') {
+                let parts = calcBasic.current.split(/[\+\-\*\/]/);
+                let lastNum = parts[parts.length-1];
+                if(lastNum.includes(',')) return;
+            }
+
             if (calcBasic.current === '0' && char !== ',') calcBasic.current = char;
             else calcBasic.current += char;
             calcBasic.update();
         },
+        
         clear: () => {
-            calcBasic.current = '0';
-            calcBasic.update();
+            if (calcBasic.current === '0') {
+                // Limpa histórico se apertar C quando já zerado
+                calcBasic.tape.innerHTML = '';
+            } else {
+                calcBasic.current = '0';
+                calcBasic.update();
+            }
         },
+        
         backspace: () => {
             calcBasic.current = calcBasic.current.slice(0, -1) || '0';
             calcBasic.update();
         },
+        
         calculate: () => {
             try {
-                // Para avaliar, substituímos , por .
-                let expr = calcBasic.current.replace(/,/g, '.');
-                let result = eval(expr); 
+                let expression = calcBasic.current;
+                // Troca , por . para o eval
+                let evalExpr = expression.replace(/\./g, '').replace(/,/g, '.').replace(/×/g, '*').replace(/÷/g, '/');
+                
+                let result = eval(evalExpr); 
                 if (!isFinite(result)) throw new Error();
-                // Resultado volta a usar virgula para decimal
-                calcBasic.current = String(result).replace('.', ',');
+                
+                // Formata resultado
+                let resStr = String(result).replace('.', ',');
+                
+                // Adiciona ao histórico (Fita)
+                let line = document.createElement('div');
+                line.className = 'calc-tape-row';
+                // Formata a expressão também para ficar bonito (1.000 + 500)
+                let prettyExpr = calcBasic.formatDisplay(expression);
+                let prettyRes = calcBasic.formatDisplay(resStr);
+                
+                line.innerHTML = `<span>${prettyExpr}</span> = ${prettyRes}`;
+                calcBasic.tape.appendChild(line);
+                
+                // Scroll para baixo
+                calcBasic.tape.scrollTop = calcBasic.tape.scrollHeight;
+                
+                // Novo atual é o resultado
+                calcBasic.current = resStr;
+                
             } catch {
                 calcBasic.current = 'Erro';
             }
             calcBasic.update();
         },
+        
         copyToClipboard: () => {
-            let txt = document.getElementById('calc-display').innerText;
+            let txt = calcBasic.displayCurrent.innerText;
             navigator.clipboard.writeText(txt).then(() => {
-                alert('Resultado copiado!');
+                // Feedback visual rápido
+                let btn = document.querySelector('#calculadora .btn-secondary');
+                let orig = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                setTimeout(() => btn.innerHTML = orig, 1500);
             });
         }
     };
