@@ -1,0 +1,777 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultor Financeiro Pro v2.7 (Web)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* --- VARIÁVEIS E RESET --- */
+        :root {
+            --bg-color: #F4F6F9;
+            --sidebar-bg: #FFFFFF;
+            --card-bg: #FFFFFF;
+            --primary: #2563EB;
+            --primary-hover: #1E40AF;
+            --text-main: #1C1C1C;
+            --text-sub: #64748B;
+            --input-bg: #FFFFFF;
+            --input-border: #CBD5E1;
+            --success: #059669;
+            --danger: #DC2626;
+            --warning: #D97706;
+            --neutral: #64748B;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body { background-color: var(--bg-color); display: flex; height: 100vh; overflow: hidden; }
+
+        /* --- SIDEBAR --- */
+        aside {
+            width: 260px;
+            background-color: var(--sidebar-bg);
+            display: flex;
+            flex-direction: column;
+            border-right: 1px solid #E2E8F0;
+            padding: 20px;
+        }
+
+        .brand { font-size: 24px; font-weight: bold; color: var(--primary); margin-bottom: 40px; display: flex; align-items: center; gap: 10px; }
+        
+        nav button {
+            background: none; border: none; width: 100%; text-align: left;
+            padding: 15px; margin-bottom: 8px; border-radius: 8px;
+            font-size: 14px; font-weight: 600; color: var(--text-sub);
+            cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+        }
+        nav button:hover { background-color: #EFF6FF; color: var(--primary); }
+        nav button.active { background-color: #EBF5FF; color: var(--primary); }
+        
+        .footer { margin-top: auto; font-size: 11px; color: #94A3B8; text-align: center; }
+
+        /* --- MAIN CONTENT --- */
+        main { flex: 1; padding: 30px; overflow-y: auto; }
+
+        .page { display: none; animation: fadeIn 0.3s ease; }
+        .page.active { display: block; }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        h1 { font-size: 26px; color: var(--text-main); }
+
+        .btn-clear {
+            background-color: var(--neutral); color: white; border: none;
+            padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer;
+        }
+        .btn-clear:hover { background-color: #475569; }
+
+        .card { background-color: var(--card-bg); border-radius: 12px; padding: 25px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 20px; }
+
+        /* --- FORM ELEMENTS --- */
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 5px; font-weight: 500; }
+        
+        input, select {
+            width: 100%; padding: 10px; border: 1px solid var(--input-border);
+            border-radius: 6px; font-size: 14px; color: var(--text-main);
+            background-color: var(--input-bg); outline: none;
+        }
+        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1); }
+        input:disabled { background-color: #F1F5F9; cursor: not-allowed; }
+
+        .input-group { display: flex; gap: 10px; }
+
+        /* --- RESULT STYLES --- */
+        .result-label { font-size: 14px; font-weight: bold; color: var(--text-main); margin-bottom: 2px; }
+        .result-value { font-size: 20px; font-weight: bold; }
+        .text-success { color: var(--success); }
+        .text-primary { color: var(--primary); }
+        .text-danger { color: var(--danger); }
+        .text-warning { color: var(--warning); }
+
+        .result-box {
+            background-color: #F0FDF4; border: 1px solid #BBF7D0;
+            border-radius: 8px; padding: 15px; text-align: center; margin-top: 10px;
+        }
+        .result-box.blue { background-color: #EFF6FF; border-color: #BFDBFE; }
+
+        /* --- BUTTONS --- */
+        .btn-primary {
+            background-color: var(--primary); color: white; border: none;
+            padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer;
+            width: 100%; font-size: 14px; transition: bg 0.2s;
+        }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+
+        /* --- TABLES --- */
+        .table-container {
+            border: 1px solid #E2E8F0; border-radius: 8px; overflow: hidden;
+            max-height: 400px; overflow-y: auto; background: white;
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { background-color: #F8FAFC; padding: 12px; text-align: left; font-weight: 600; color: var(--text-sub); position: sticky; top: 0; }
+        td { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; color: var(--text-main); }
+        tr:last-child td { border-bottom: none; }
+        tr:nth-child(even) { background-color: #F8FAFC; }
+        .row-carencia { background-color: #FFFBEB !important; }
+        .row-carencia td { color: #D97706; }
+
+        /* --- CARDS SUMMARY (Indices) --- */
+        .summary-cards { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px; }
+        .s-card { background: white; border: 2px solid; border-radius: 8px; padding: 15px; text-align: center; }
+        .s-card h4 { font-size: 12px; color: gray; margin-bottom: 8px; font-weight: normal; }
+        .s-card div { font-size: 20px; font-weight: bold; }
+
+        /* Radio Group */
+        .radio-group { display: flex; gap: 15px; align-items: center; padding: 10px 0; }
+        .radio-group label { margin: 0; cursor: pointer; display: flex; align-items: center; gap: 5px; }
+        
+    </style>
+</head>
+<body>
+
+<aside>
+    <div class="brand"><i class="fas fa-wallet"></i> Finanças Web</div>
+    <nav>
+        <button class="active" onclick="app.showPage('cartao')"><i class="fas fa-credit-card"></i> À Vista ou Parcelado</button>
+        <button onclick="app.showPage('financiamento')"><i class="fas fa-calculator"></i> Cálculo Juros</button>
+        <button onclick="app.showPage('emprestimo')"><i class="fas fa-hand-holding-dollar"></i> Simulador Empréstimo</button>
+        <button onclick="app.showPage('indices')"><i class="fas fa-chart-line"></i> Índices Econômicos</button>
+    </nav>
+    <div class="footer">v2.7 Web | Ported Logic</div>
+</aside>
+
+<main>
+    <div id="cartao" class="page active">
+        <div class="header-bar">
+            <h1>À Vista ou Parcelado?</h1>
+            <button class="btn-clear" onclick="cartao.limpar()">Limpar Campos</button>
+        </div>
+
+        <div class="card">
+            <div class="form-grid">
+                <div>
+                    <div class="form-group">
+                        <label>Valor da Compra:</label>
+                        <input type="text" id="c_compra" placeholder="R$ 0,00" oninput="maskMoney(this); cartao.calcular()">
+                    </div>
+                    <div class="form-group">
+                        <label>Desconto Pagto Pix:</label>
+                        <div class="input-group">
+                            <select id="c_tipo_desc" style="width: 110px;" onchange="cartao.limparDesconto()">
+                                <option value="%">%</option>
+                                <option value="R$ Desc.">R$ Desc.</option>
+                                <option value="Valor Final">Valor Final</option>
+                            </select>
+                            <input type="text" id="c_desconto" oninput="cartao.maskDesc(this); cartao.calcular()">
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="form-group">
+                        <div class="result-label">Valor Pix (À vista):</div>
+                        <div id="c_res_pix" class="result-value text-success">R$ 0,00</div>
+                    </div>
+                    <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 20px 0;">
+                    <div class="form-group">
+                        <label>Qtd Parcelas sem juros:</label>
+                        <input type="number" id="c_parc" value="1" oninput="cartao.calcular()">
+                    </div>
+                    <div class="form-group">
+                        <div class="result-label">Valor da Parcela:</div>
+                        <div id="c_res_parc" class="result-value text-primary">R$ 0,00</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-box">
+                <div style="font-size: 13px; color: #166534; margin-bottom: 5px;">Taxa Mensal Implícita</div>
+                <div id="c_res_taxa" style="font-size: 32px; color: #15803D; font-weight: bold;">0,00 %</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="financiamento" class="page">
+        <div class="header-bar">
+            <h1>Calculadora de Juros</h1>
+            <button class="btn-clear" onclick="finan.limpar()">Limpar Campos</button>
+        </div>
+
+        <div class="card">
+            <div class="form-group">
+                <label>O que calcular?</label>
+                <div class="radio-group">
+                    <label><input type="radio" name="f_target" value="pv" onchange="finan.updateState()"> Valor Financiado</label>
+                    <label><input type="radio" name="f_target" value="pmt" onchange="finan.updateState()"> Valor Parcela</label>
+                    <label><input type="radio" name="f_target" value="i" checked onchange="finan.updateState()"> Taxa Juros</label>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Valor Financ. (PV):</label>
+                    <input type="text" id="f_pv" placeholder="R$ 0,00" oninput="maskMoney(this); finan.calc()">
+                </div>
+                <div class="form-group">
+                    <label>Nº Meses (N):</label>
+                    <input type="number" id="f_n" oninput="finan.calc()">
+                </div>
+                <div class="form-group">
+                    <label>Valor Parcela (PMT):</label>
+                    <input type="text" id="f_pmt" placeholder="R$ 0,00" oninput="maskMoney(this); finan.calc()">
+                </div>
+                <div class="form-group">
+                    <label>Taxa Mensal (%):</label>
+                    <input type="text" id="f_i" placeholder="0,00" oninput="maskFloat(this); finan.calc()">
+                </div>
+            </div>
+
+            <div class="result-box blue">
+                <div id="f_res_total" style="font-size: 16px; color: var(--primary); font-weight: bold;">Total: R$ 0,00</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="emprestimo" class="page">
+        <div class="header-bar">
+            <h1>Simulador de Empréstimo</h1>
+            <button class="btn-clear" onclick="emprestimo.limpar()">Limpar Campos</button>
+        </div>
+
+        <div class="card">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Capital Solicitado:</label>
+                    <input type="text" id="e_capital" placeholder="R$ 0,00" oninput="maskMoney(this)">
+                </div>
+                <div class="form-group">
+                    <label>Nº Parcelas:</label>
+                    <input type="number" id="e_n">
+                </div>
+                <div class="form-group">
+                    <label>Taxa Juros (% a.m.):</label>
+                    <input type="text" id="e_taxa" oninput="maskFloat(this)">
+                </div>
+                <div class="form-group">
+                    <label>Data Contrato (Hoje):</label>
+                    <input type="text" id="e_dt_contrato" disabled style="background-color: #F1F5F9;">
+                </div>
+                <div class="form-group">
+                    <label>1ª Parcela (DD/MM/AAAA):</label>
+                    <input type="text" id="e_dt_primeira" oninput="maskDate(this)" placeholder="DD/MM/AAAA">
+                </div>
+                <div class="form-group">
+                    <label>Sistema de Amortização:</label>
+                    <select id="e_metodo">
+                        <option value="SAC">SAC (Decrescente)</option>
+                        <option value="PRICE">PRICE (Fixa)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="emprestimo.gerar()">Gerar Tabela</button>
+        </div>
+
+        <div class="table-container">
+            <table id="e_tabela">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Vencimento</th>
+                        <th>Juros</th>
+                        <th>Amort</th>
+                        <th>Prest</th>
+                        <th>Saldo</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="indices" class="page">
+        <div class="header-bar">
+            <h1>Índices Econômicos (BCB)</h1>
+            <button class="btn-clear" onclick="indices.limpar()">Limpar</button>
+        </div>
+
+        <div class="card">
+            <div class="form-grid" style="grid-template-columns: 2fr 1fr 1fr;">
+                <div class="form-group">
+                    <label>Indicador:</label>
+                    <select id="i_indicador">
+                        <option value="196">Poupança (Rentab. Mensal)</option>
+                        <option value="4391">CDI (Taxa Mensal)</option>
+                        <option value="4390">SELIC (Meta Mensal)</option>
+                        <option value="433">IPCA (Inflação Mensal)</option>
+                        <option value="189">IGP-M (Inflação Mensal)</option>
+                        <option value="25463">Cheque Especial (PF - Mensal)</option>
+                        <option value="1">Dólar (Venda PTAX)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Últimos (meses):</label>
+                    <input type="number" id="i_meses" value="12">
+                </div>
+                <div class="form-group" style="display: flex; align-items: flex-end;">
+                    <button class="btn-primary" onclick="indices.buscar()">Consultar Online</button>
+                </div>
+            </div>
+
+            <div class="summary-cards">
+                <div class="s-card" style="border-color: var(--primary);">
+                    <h4>Média no Período</h4>
+                    <div id="i_media" style="color: var(--primary);">...</div>
+                </div>
+                <div class="s-card" style="border-color: var(--success);">
+                    <h4 id="i_lbl_acum">Acumulado Total</h4>
+                    <div id="i_acum" style="color: var(--success);">...</div>
+                </div>
+                <div class="s-card" style="border-color: var(--warning);">
+                    <h4>Maior Valor</h4>
+                    <div id="i_max" style="color: var(--warning);">...</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="table-container">
+            <table id="i_tabela">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th style="text-align: right;">Valor</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+</main>
+
+<script>
+    /* --- MÁSCARAS E UTILS --- */
+    function parseMoney(val) {
+        if (!val) return 0;
+        let clean = val.replace(/\D/g, '');
+        return parseFloat(clean) / 100;
+    }
+    
+    function formatMoney(val) {
+        return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    }
+
+    function parseFloatBr(val) {
+        if (!val) return 0;
+        return parseFloat(val.replace(/\./g, '').replace(',', '.'));
+    }
+
+    function maskMoney(input) {
+        let value = input.value.replace(/\D/g, '');
+        value = (parseInt(value) / 100).toFixed(2) + '';
+        value = value.replace('.', ',');
+        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
+        input.value = value === 'NaN' ? '' : 'R$ ' + value;
+    }
+
+    function maskFloat(input) {
+        let v = input.value.replace(/[^\d,]/g, ''); 
+        input.value = v;
+    }
+
+    function maskDate(input) {
+        let v = input.value.replace(/\D/g, '').slice(0, 8);
+        if (v.length >= 5) {
+            input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
+        } else if (v.length >= 3) {
+            input.value = `${v.slice(0,2)}/${v.slice(2)}`;
+        } else {
+            input.value = v;
+        }
+    }
+
+    function parseDate(str) {
+        const parts = str.split('/');
+        return new Date(parts[2], parts[1] - 1, parts[0]);
+    }
+
+    function formatDate(date) {
+        const d = date.getDate().toString().padStart(2, '0');
+        const m = (date.getMonth() + 1).toString().padStart(2, '0');
+        const y = date.getFullYear();
+        return `${d}/${m}/${y}`;
+    }
+
+    // Adicionar mês mantendo dia (ex: 30/01 + 1 mes -> 28/02)
+    function addMonth(date, months) {
+        let d = new Date(date);
+        let targetMonth = d.getMonth() + months;
+        let year = d.getFullYear() + Math.floor(targetMonth / 12);
+        let month = ((targetMonth % 12) + 12) % 12;
+        let day = d.getDate();
+        
+        let lastDay = new Date(year, month + 1, 0).getDate();
+        d.setFullYear(year, month, Math.min(day, lastDay));
+        return d;
+    }
+
+    /* --- NAV --- */
+    const app = {
+        showPage: (id) => {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            // Busca o botão que chama essa função para ativar (simplificado)
+            const btns = document.querySelectorAll('nav button');
+            if(id === 'cartao') btns[0].classList.add('active');
+            if(id === 'financiamento') btns[1].classList.add('active');
+            if(id === 'emprestimo') btns[2].classList.add('active');
+            if(id === 'indices') btns[3].classList.add('active');
+        }
+    };
+
+    /* --- CARTAO LOGIC --- */
+    const cartao = {
+        limpar: () => {
+            document.getElementById('c_compra').value = '';
+            document.getElementById('c_desconto').value = '';
+            document.getElementById('c_parc').value = '1';
+            document.getElementById('c_tipo_desc').value = '%';
+            cartao.calcular();
+        },
+        limparDesconto: () => {
+            document.getElementById('c_desconto').value = '';
+            cartao.calcular();
+        },
+        maskDesc: (input) => {
+            const tipo = document.getElementById('c_tipo_desc').value;
+            if (tipo === '%') maskFloat(input);
+            else maskMoney(input);
+        },
+        calcular: () => {
+            const compra = parseMoney(document.getElementById('c_compra').value);
+            const tipo = document.getElementById('c_tipo_desc').value;
+            let descStr = document.getElementById('c_desconto').value;
+            
+            let pix = 0;
+            let descVal = 0;
+
+            if (tipo === '%') {
+                descVal = parseFloatBr(descStr);
+                pix = compra * (1 - descVal / 100);
+            } else {
+                descVal = parseMoney(descStr);
+                if (tipo === 'R$ Desc.') pix = compra - descVal;
+                else pix = descVal; // Valor Final
+            }
+
+            if (pix < 0) pix = 0;
+
+            let qtd = parseInt(document.getElementById('c_parc').value) || 1;
+            if (qtd < 1) qtd = 1;
+
+            const parc = compra / qtd;
+
+            document.getElementById('c_res_pix').innerText = formatMoney(pix);
+            document.getElementById('c_res_parc').innerText = formatMoney(parc);
+
+            let taxa = 0;
+            if (pix > 0 && parc > 0 && qtd > 1) {
+                // Estimativa para UI rápida
+                taxa = (Math.pow((parc * qtd) / pix, 1 / qtd) - 1) * 100;
+            }
+            document.getElementById('c_res_taxa').innerText = taxa.toFixed(4).replace('.', ',') + ' %';
+        }
+    };
+
+    /* --- FINANCIAMENTO LOGIC --- */
+    const finan = {
+        limpar: () => {
+            document.getElementById('f_pv').value = '';
+            document.getElementById('f_n').value = '';
+            document.getElementById('f_pmt').value = '';
+            document.getElementById('f_i').value = '';
+            finan.updateState();
+        },
+        updateState: () => {
+            const target = document.querySelector('input[name="f_target"]:checked').value;
+            const fields = ['f_pv', 'f_n', 'f_pmt', 'f_i'];
+            
+            fields.forEach(id => {
+                const el = document.getElementById(id);
+                el.disabled = false;
+                el.style.color = 'var(--text-main)';
+                el.style.fontWeight = 'normal';
+                
+                if (id.includes(target)) {
+                    el.value = 'Calculando...';
+                    el.disabled = true;
+                    el.style.color = 'var(--danger)';
+                    el.style.fontWeight = 'bold';
+                } else {
+                    if (el.value === 'Calculando...') el.value = '';
+                }
+            });
+            finan.calc();
+        },
+        calc: () => {
+            const target = document.querySelector('input[name="f_target"]:checked').value;
+            
+            const getVal = (id) => {
+                if (id === 'f_n') return parseInt(document.getElementById(id).value) || 0;
+                if (id === 'f_i') return parseFloatBr(document.getElementById(id).value) / 100;
+                return parseMoney(document.getElementById(id).value);
+            };
+
+            let pv = getVal('f_pv');
+            let n = getVal('f_n');
+            let pmt = getVal('f_pmt');
+            let i = getVal('f_i');
+            let res = 0;
+
+            try {
+                if (target === 'pmt' && i !== 0 && n > 0) {
+                    res = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+                } else if (target === 'pv' && i !== 0 && n > 0) {
+                    res = pmt * (Math.pow(1 + i, n) - 1) / (i * Math.pow(1 + i, n));
+                } else if (target === 'i' && n > 0 && pv > 0 && pmt > 0) {
+                    res = (Math.pow((pmt * n) / pv, 1 / n) - 1) * 100;
+                }
+
+                const resEl = document.getElementById('f_' + target);
+                if (res > 0) {
+                    if (target === 'i') resEl.value = res.toFixed(2).replace('.', ',');
+                    else resEl.value = formatMoney(res);
+                    
+                    document.getElementById('f_res_total').innerText = 'Total: ' + formatMoney(pmt * n || res * n || pv);
+                } else {
+                   // Mantém calculando
+                }
+            } catch (e) {}
+        }
+    };
+
+    /* --- EMPRESTIMO LOGIC (PRO-RATA) --- */
+    const emprestimo = {
+        limpar: () => {
+            document.getElementById('e_capital').value = '';
+            document.getElementById('e_n').value = '';
+            document.getElementById('e_taxa').value = '';
+            
+            // Reset datas
+            document.getElementById('e_dt_contrato').value = formatDate(new Date());
+            let nextM = new Date(); nextM.setDate(nextM.getDate() + 30);
+            document.getElementById('e_dt_primeira').value = formatDate(nextM);
+            
+            document.querySelector('#e_tabela tbody').innerHTML = '';
+        },
+        gerar: () => {
+            const tbody = document.querySelector('#e_tabela tbody');
+            tbody.innerHTML = '';
+
+            const capital = parseMoney(document.getElementById('e_capital').value);
+            const n = parseInt(document.getElementById('e_n').value) || 0;
+            const taxa = parseFloatBr(document.getElementById('e_taxa').value) / 100;
+            const metodo = document.getElementById('e_metodo').value;
+            
+            // Data Contrato (Hoje) e Primeira Parcela
+            const dtCtr = new Date(); // Hoje
+            // Força zerar hora
+            dtCtr.setHours(0,0,0,0);
+            
+            let dtPriStr = document.getElementById('e_dt_primeira').value;
+            if (dtPriStr.length < 10) { alert('Data inválida'); return; }
+            const dtPri = parseDate(dtPriStr);
+
+            if (!capital || !n) return;
+
+            let saldo = capital;
+            const amortSAC = capital / n;
+            let idx = 1;
+
+            // --- FASE 1: CARENCIA (PRO-RATA) ---
+            let refAnterior = new Date(dtCtr);
+            const diaVenc = dtPri.getDate();
+
+            while (true) {
+                // Calcular proximo vencimento teórico
+                let proxMes = new Date(refAnterior);
+                proxMes.setMonth(proxMes.getMonth() + 1);
+                
+                // Ajustar para o dia do vencimento escolhido
+                let ano = proxMes.getFullYear();
+                let mes = proxMes.getMonth();
+                let lastDay = new Date(ano, mes + 1, 0).getDate();
+                proxMes.setDate(Math.min(diaVenc, lastDay));
+
+                // Verifica se o próximo vencimento teórico é ANTERIOR à 1ª parcela (com folga de 5 dias)
+                let limitDate = new Date(dtPri);
+                limitDate.setDate(limitDate.getDate() - 5);
+
+                if (proxMes < limitDate) {
+                    // Calcula dias
+                    const diffTime = Math.abs(proxMes - refAnterior);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    
+                    // Juros pro-rata simples (padrão bancário para carência)
+                    const juros = saldo * (taxa / 30 * diffDays);
+                    
+                    emprestimo.addRow(idx, formatDate(proxMes), juros, 0, juros, saldo, true);
+                    idx++;
+                    refAnterior = new Date(proxMes);
+                } else {
+                    break;
+                }
+            }
+
+            // --- FASE 2: AMORTIZACAO ---
+            let currentDate = new Date(dtPri);
+            
+            for (let i = 1; i <= n; i++) {
+                let juros = saldo * taxa;
+                let amort = 0;
+                let prest = 0;
+
+                if (metodo === 'SAC') {
+                    amort = amortSAC;
+                    prest = amort + juros;
+                } else {
+                    // Price
+                    if (taxa > 0) prest = capital * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1);
+                    else prest = capital / n;
+                    amort = prest - juros;
+                }
+
+                saldo -= amort;
+                if (saldo < 0) saldo = 0;
+
+                emprestimo.addRow(idx, formatDate(currentDate), juros, amort, prest, saldo, false);
+                
+                // Avança 1 mês mantendo o dia
+                currentDate = addMonth(dtPri, i);
+                idx++;
+            }
+        },
+        addRow: (idx, data, juros, amort, prest, saldo, isCarencia) => {
+            const tbody = document.querySelector('#e_tabela tbody');
+            const tr = document.createElement('tr');
+            if (isCarencia) tr.classList.add('row-carencia');
+            
+            tr.innerHTML = `
+                <td><b>${idx}</b></td>
+                <td>${data}</td>
+                <td style="${isCarencia ? 'color:#D97706; font-weight:bold' : ''}">${formatMoney(juros)}</td>
+                <td>${formatMoney(amort)}</td>
+                <td>${formatMoney(prest)}</td>
+                <td>${formatMoney(saldo)}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    };
+
+    /* --- INDICES LOGIC (CORS PROXY) --- */
+    const indices = {
+        limpar: () => {
+            document.getElementById('i_media').innerText = '...';
+            document.getElementById('i_acum').innerText = '...';
+            document.getElementById('i_max').innerText = '...';
+            document.querySelector('#i_tabela tbody').innerHTML = '';
+        },
+        buscar: async () => {
+            indices.limpar();
+            const btn = document.querySelector('#indices .btn-primary');
+            const originalText = btn.innerText;
+            btn.innerText = 'Buscando...';
+            btn.disabled = true;
+
+            const codigo = document.getElementById('i_indicador').value;
+            const nome = document.getElementById('i_indicador').options[document.getElementById('i_indicador').selectedIndex].text;
+            let meses = parseInt(document.getElementById('i_meses').value) || 12;
+
+            // Datas
+            const hoje = new Date();
+            const dtIni = new Date();
+            dtIni.setDate(hoje.getDate() - (meses * 32)); // Margem segurança
+            
+            const sIni = formatDate(dtIni);
+            const sFim = formatDate(hoje);
+
+            // URL BCB via PROXY (AllOrigins) para evitar CORS em HTML local
+            const bcbUrl = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json&dataInicial=${sIni}&dataFinal=${sFim}`;
+            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(bcbUrl)}`;
+
+            try {
+                const resp = await fetch(proxyUrl);
+                if (!resp.ok) throw new Error('Erro API');
+                const data = await resp.json();
+                
+                // Pega os últimos N
+                const dados = data.slice(-meses).reverse();
+                
+                indices.render(dados, nome);
+
+            } catch (e) {
+                alert('Erro ao buscar dados. Verifique sua conexão.\n' + e.message);
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        },
+        render: (dados, nome) => {
+            const isDolar = nome.includes('Dólar');
+            const simbolo = isDolar ? 'R$ ' : '';
+            const suffix = isDolar ? '' : '%';
+            
+            document.getElementById('i_lbl_acum').innerText = isDolar ? 'Variação Período' : 'Acumulado Total';
+
+            const tbody = document.querySelector('#i_tabela tbody');
+            let vals = [];
+
+            dados.forEach(d => {
+                const val = parseFloat(d.valor);
+                vals.push(val);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${d.data}</td>
+                    <td style="text-align: right; font-weight: bold;">${simbolo}${val.toFixed(4).replace('.', ',')}${suffix}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            if (vals.length > 0) {
+                const media = vals.reduce((a,b)=>a+b,0) / vals.length;
+                const maxVal = Math.max(...vals);
+                
+                let acumStr = '';
+
+                if (isDolar) {
+                    const atual = vals[0];
+                    const antigo = vals[vals.length-1];
+                    const variacao = ((atual - antigo) / antigo) * 100;
+                    acumStr = (variacao > 0 ? '+' : '') + variacao.toFixed(2).replace('.', ',') + '%';
+                } else {
+                    let acum = 1.0;
+                    vals.forEach(v => acum *= (1 + v/100));
+                    acumStr = ((acum - 1) * 100).toFixed(2).replace('.', ',') + '%';
+                }
+
+                document.getElementById('i_media').innerText = simbolo + media.toFixed(4).replace('.', ',') + suffix;
+                document.getElementById('i_acum').innerText = acumStr;
+                document.getElementById('i_max').innerText = simbolo + maxVal.toFixed(4).replace('.', ',') + suffix;
+            }
+        }
+    };
+
+    // Init
+    window.onload = () => {
+        // Setar data contrato hoje
+        document.getElementById('e_dt_contrato').value = formatDate(new Date());
+        let nextM = new Date(); nextM.setDate(nextM.getDate() + 30);
+        document.getElementById('e_dt_primeira').value = formatDate(nextM);
+    };
+
+</script>
+</body>
+</html>
