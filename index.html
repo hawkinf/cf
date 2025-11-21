@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Consultor Financeiro Pro v2.12</title>
+    <title>Consultor Financeiro Pro v2.13</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
@@ -69,7 +69,10 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
         .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        h1 { font-size: 24px; color: var(--text-main); margin: 0; }
+        
+        /* ESTILO DOS TÍTULOS COM ÍCONES */
+        h1 { font-size: 24px; color: var(--text-main); margin: 0; display: flex; align-items: center; }
+        h1 i { margin-right: 12px; color: var(--primary); font-size: 0.9em; }
 
         .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 20px; }
 
@@ -225,13 +228,13 @@
             <i class="fas fa-chart-line"></i> <span>Índices</span>
         </button>
     </nav>
-    <div class="footer">v2.12 PWA</div>
+    <div class="footer">v2.13 PWA</div>
 </aside>
 
 <main>
     <div id="cartao" class="page active">
         <div class="header-bar">
-            <h1>À Vista ou Parcelado?</h1>
+            <h1><i class="fas fa-credit-card"></i> À Vista ou Parcelado?</h1>
         </div>
         <div class="card">
             <div class="form-grid">
@@ -279,7 +282,7 @@
 
     <div id="financiamento" class="page">
         <div class="header-bar">
-            <h1>Calculadora de Juros</h1>
+            <h1><i class="fas fa-calculator"></i> Calculadora de Juros</h1>
         </div>
         <div class="card">
             <div class="form-group">
@@ -318,7 +321,7 @@
 
     <div id="emprestimo" class="page">
         <div class="header-bar">
-            <h1>Simulador de Empréstimo</h1>
+            <h1><i class="fas fa-hand-holding-dollar"></i> Simulador de Empréstimo</h1>
         </div>
         <div class="card">
             <div class="form-grid">
@@ -371,7 +374,7 @@
 
     <div id="indices" class="page">
         <div class="header-bar">
-            <h1>Índices Econômicos</h1>
+            <h1><i class="fas fa-chart-line"></i> Índices Econômicos</h1>
         </div>
         <div class="card">
             <div class="form-grid">
@@ -464,7 +467,6 @@
         else input.value = v;
     }
     
-    // FUNÇÃO PORCENTAGEM 2 CASAS (Dispara no onBlur)
     function formatPercentage(input) {
         let val = input.value.replace(',', '.');
         val = val.replace(/[^0-9.]/g, '');
@@ -472,15 +474,11 @@
         let floatVal = parseFloat(val);
         if(isNaN(floatVal)) return;
         input.value = floatVal.toFixed(2).replace('.', ',');
-        // Se for calculadora de juros, recalcula
         if(input.id === 'f_i') finan.calc();
     }
 
-    // NOVA: MÁSCARA PARA FLUTUANTES (Bloqueia letras)
     function maskFloat(input) {
-        // Remove tudo que não é digito ou virgula/ponto
         let v = input.value.replace(/[^0-9,.]/g, '');
-        // Garante apenas uma virgula
         input.value = v;
     }
 
@@ -539,13 +537,13 @@
         maskDesc: (input) => {
             const tipo = document.getElementById('c_tipo_desc').value;
             if (tipo === '%') {
-                maskFloat(input); // CORREÇÃO: Só numeros e virgula
+                maskFloat(input); 
             } else maskMoney(input);
         },
         formatDesc: (input) => {
             const tipo = document.getElementById('c_tipo_desc').value;
             if (tipo === '%') {
-                formatPercentage(input); // CORREÇÃO: Formata 0,00 ao sair
+                formatPercentage(input);
                 cartao.calcular();
             }
         },
