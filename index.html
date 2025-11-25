@@ -2,861 +2,1303 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Consultor Financeiro Pro v2.19</title>
-    
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#2563EB">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="./icon-192.png">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultor Financeiro Pro (Web)</title>
+    <link href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /*
+         * CONFIGURAÇÃO VISUAL (Design System baseado no CustomTkinter)
+         */
         :root {
-            --bg-color: #F4F6F9;
-            --sidebar-bg: #FFFFFF;
-            --card-bg: #FFFFFF;
-            --primary: #2563EB;
-            --primary-hover: #1E40AF;
-            --text-main: #1C1C1C;
-            --text-sub: #64748B;
-            --input-bg: #FFFFFF;
-            --input-border: #CBD5E1;
-            --success: #059669;
-            --danger: #DC2626;
-            --warning: #D97706;
-            --neutral: #64748B;
-            --neutral-hover: #475569;
+            /* Cores Primárias (do Python) */
+            --color-primary: #2563EB;
+            --color-success: #059669;
+            --color-danger: #DC2626;
+            --color-warning: #D97706;
+            --color-neutral: #64748B;
+            --color-info-text: #64748B;
+            --color-card-light: #FFFFFF;
+            --color-bg-light: #F3F4F6;
+            --color-text-light: #1C1C1C;
+
+            /* Cores Dark Mode */
+            --color-bg-dark: #1F2937;
+            --color-card-dark: #2B2B2B;
+            --color-text-dark: #F0F0F0;
+            --color-info-text-dark: #9CA3AF;
+
+            /* Variáveis de Tema */
+            --current-bg: var(--color-bg-light);
+            --current-text: var(--color-text-light);
+            --current-card-bg: var(--color-card-light);
+            --current-info-text: var(--color-info-text);
+            --color-hover: #E5E7EB;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; -webkit-tap-highlight-color: transparent; }
-
-        body { background-color: var(--bg-color); display: flex; height: 100vh; overflow: hidden; }
-
-        /* SIDEBAR */
-        aside {
-            width: 260px; background-color: var(--sidebar-bg); display: flex; flex-direction: column;
-            border-right: 1px solid #E2E8F0; padding: 20px; flex-shrink: 0; z-index: 1000;
+        /* Tema Escuro */
+        body.dark-mode {
+            --current-bg: var(--color-bg-dark);
+            --current-text: var(--color-text-dark);
+            --current-card-bg: var(--color-card-dark);
+            --current-info-text: var(--color-info-text-dark);
+            --color-hover: #374151;
         }
-        .brand { font-size: 22px; font-weight: bold; color: var(--primary); margin-bottom: 30px; display: flex; align-items: center; gap: 10px; }
-        nav button {
-            background: none; border: none; width: 100%; text-align: left; padding: 15px; margin-bottom: 8px;
-            border-radius: 8px; font-size: 14px; font-weight: 600; color: var(--text-sub); cursor: pointer;
-            transition: all 0.2s; display: flex; align-items: center; gap: 10px;
+
+        /* Reset e Fontes */
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
-        nav button:hover { background-color: #EFF6FF; color: var(--primary); }
-        nav button.active { background-color: #EBF5FF; color: var(--primary); }
-        .footer { margin-top: auto; font-size: 11px; color: #94A3B8; text-align: center; padding-top: 20px; }
 
-        /* MAIN CONTENT */
-        main { flex: 1; padding: 20px; overflow-y: auto; position: relative; }
-        .page { display: none; animation: fadeIn 0.3s ease; max-width: 1000px; margin: 0 auto; padding-bottom: 80px; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        .header-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        h1 { font-size: 24px; color: var(--text-main); margin: 0; display: flex; align-items: center; }
-        h1 i { margin-right: 12px; color: var(--primary); font-size: 0.9em; }
-
-        .card { background-color: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); margin-bottom: 20px; }
-        .form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; font-size: 13px; color: var(--text-sub); margin-bottom: 6px; font-weight: 600; }
-        
-        input, select {
-            width: 100%; padding: 12px; border: 1px solid var(--input-border); border-radius: 8px;
-            font-size: 15px; color: var(--text-main); background-color: var(--input-bg); outline: none; transition: border 0.2s;
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            background-color: var(--current-bg);
+            color: var(--current-text);
         }
-        input:focus, select:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
-        input.calculating { background-color: #FEF2F2 !important; color: var(--danger) !important; font-weight: 800 !important; border-color: var(--danger) !important; cursor: not-allowed; }
 
-        .input-group { display: flex; gap: 10px; }
-        .result-label { font-size: 13px; font-weight: bold; color: var(--text-main); margin-bottom: 4px; }
-        .result-value { font-size: 22px; font-weight: bold; }
-        .text-success { color: var(--success); }
-        .text-primary { color: var(--primary); }
-        .result-box { background-color: #F0FDF4; border: 1px solid #BBF7D0; border-radius: 8px; padding: 15px; text-align: center; margin-top: 10px; }
-        .result-box.blue { background-color: #EFF6FF; border-color: #BFDBFE; }
-
-        .btn-primary, .btn-secondary {
-            padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 15px;
-            transition: background 0.2s; margin-top: 10px; border: none; display: flex; align-items: center; justify-content: center; gap: 8px;
-        }
-        .btn-primary { background-color: var(--primary); color: white; }
-        .btn-primary:hover { background-color: var(--primary-hover); }
-        .btn-secondary { background-color: var(--neutral); color: white; }
-        .btn-secondary:hover { background-color: var(--neutral-hover); }
-
-        /* TABELAS - CORREÇÃO DE SCROLL */
-        .table-container {
-            border: 1px solid #E2E8F0; border-radius: 8px; 
-            overflow: hidden; 
-            background: white; 
-            max-height: 400px; /* Limite vertical */
+        #app {
             display: flex;
             flex-direction: column;
+            min-height: 100%; /* Garante que o app ocupe a altura total */
         }
-        /* Container interno rolável para horizontal e vertical */
-        .table-scroll {
-            overflow: auto; /* Permite scroll X e Y */
+
+        /* Área de Conteúdo (ocupa todo o espaço central) */
+        #content-container {
+            flex-grow: 1;
+            overflow-y: auto; /* Permite scroll no conteúdo */
+            padding: 20px;
+            max-width: 1200px;
             width: 100%;
-            -webkit-overflow-scrolling: touch;
+            margin: 0 auto;
+            padding-bottom: 90px; /* Espaço para o menu inferior (navbar) */
         }
         
-        table { 
-            width: 100%; 
-            border-collapse: collapse; 
-            font-size: 13px; 
-            white-space: nowrap; /* Impede quebra de linha, forçando scroll se necessário */
+        /* Oculta as telas por padrão */
+        .screen {
+            display: none;
         }
-        
-        th { 
-            background-color: #F8FAFC; padding: 12px; text-align: left; 
-            font-weight: 600; color: var(--text-sub); 
-            position: sticky; top: 0; z-index: 10; /* Cabeçalho fixo */
-            border-bottom: 2px solid #E2E8F0;
-        }
-        
-        td { padding: 10px 12px; border-bottom: 1px solid #F1F5F9; color: var(--text-main); }
-        .row-carencia { background-color: #FFFBEB !important; }
-        .row-carencia td { color: #D97706; }
 
-        .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .s-card { background: white; border: 2px solid; border-radius: 10px; padding: 15px; text-align: center; }
-        .s-card div { font-size: 18px; font-weight: bold; word-wrap: break-word; }
+        .screen.active {
+            display: block;
+        }
 
-        .radio-group { display: flex; flex-wrap: wrap; gap: 15px; align-items: center; padding: 5px 0; }
-        .radio-group label { margin: 0; cursor: pointer; display: flex; align-items: center; gap: 6px; }
-        input[type="radio"] { width: 18px; height: 18px; accent-color: var(--primary); margin: 0; }
-
-        /* CALCULADORA */
-        .calc-container { max-width: 400px; margin: 0 auto; }
-        .calc-screen {
-            background-color: #F8FAFC; border: 2px solid #E2E8F0; border-radius: 12px; margin-bottom: 15px;
-            display: flex; flex-direction: column; justify-content: flex-end; height: 180px; padding: 15px; overflow: hidden;
-        }
-        .calc-tape {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; justify-content: flex-end; align-items: flex-end;
-            color: var(--text-sub); font-family: 'Courier New', Courier, monospace; font-size: 14px; padding-bottom: 10px;
-            margin-bottom: 5px; border-bottom: 1px dashed #CBD5E1;
-        }
-        .calc-tape-row { width: 100%; text-align: right; margin-bottom: 4px; }
-        .calc-tape-row span { font-weight: bold; color: var(--text-main); }
-        .calc-current {
-            text-align: right; font-size: 36px; color: var(--text-main); font-family: 'Courier New', Courier, monospace;
-            font-weight: bold; word-break: break-all; line-height: 1.1;
-        }
-        .calc-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
-        .calc-btn {
-            padding: 20px; font-size: 22px; border-radius: 10px; border: none; cursor: pointer;
-            background-color: white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); color: var(--text-main);
-            transition: background 0.1s, transform 0.1s; font-weight: 600;
-        }
-        .calc-btn:active { transform: scale(0.95); background-color: #F1F5F9; }
-        .calc-btn.op { background-color: #EBF5FF; color: var(--primary); }
-        .calc-btn.eq { background-color: var(--primary); color: white; grid-column: span 2; }
-        .calc-btn.cl { background-color: #FEF2F2; color: var(--danger); }
-
-        /* MOBILE */
-        @media (max-width: 768px) {
-            body { flex-direction: column; overflow: hidden; }
-            aside { 
-                position: fixed; bottom: 0; left: 0; right: 0; height: 70px; width: 100%;
-                border-right: none; border-top: 1px solid #E2E8F0; 
-                flex-direction: row; align-items: center; justify-content: space-between;
-                padding: 5px 10px; overflow-x: auto; white-space: nowrap;
-                background-color: rgba(255, 255, 255, 0.98); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); z-index: 1000;
-            }
-            .brand, .footer { display: none; }
-            nav { display: flex; gap: 8px; width: 100%; height: 100%; align-items: center; justify-content: space-around; }
-            nav button { 
-                width: auto; padding: 8px 10px; margin: 0; font-size: 11px; background: transparent; border: none; 
-                flex-direction: column; align-items: center; justify-content: center; color: var(--text-sub); gap: 4px;
-            }
-            nav button i { font-size: 18px; margin: 0; }
-            nav button.active { background: transparent; color: var(--primary); }
-            main { margin-top: 0; padding: 15px; padding-bottom: 90px; height: 100vh; overflow-y: auto; }
-            .header-bar { flex-direction: row; align-items: center; margin-bottom: 15px; }
-            h1 { font-size: 20px; }
-            .btn-clear { display: none; }
+        /* BARRA DE NAVEGAÇÃO (MENU INFERIOR/RODAPÉ) */
+        #navbar {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: var(--current-card-bg);
+            border-top: 1px solid var(--color-neutral);
+            box-shadow: 0 -4px 6px -1px rgba(0, 0, 0, 0.1);
             
-            /* Ajuste fino para tabelas no mobile */
-            th, td { padding: 10px 8px; font-size: 12px; }
+            /* Fixa no Rodapé */
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            left: 0;
+            z-index: 1000;
         }
+
+        .nav-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 10px; /* Menor para mobile */
+            font-weight: bold;
+            color: var(--current-info-text);
+            transition: background-color 0.2s, color 0.2s;
+            flex: 1;
+            margin: 0 5px;
+            text-align: center;
+            min-width: 0;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--color-hover);
+            color: var(--current-text);
+        }
+
+        .nav-btn.active {
+            background-color: var(--color-primary);
+            color: white;
+        }
+
+        .nav-btn.active:hover {
+            background-color: var(--color-primary);
+        }
+        
+        .nav-btn.active .btn-icon {
+             color: white !important;
+        }
+
+        .btn-icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+            color: var(--color-primary);
+        }
+
+        /* Estilo dos Cards e Campos */
+        .card {
+            background-color: var(--current-card-bg);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+            margin-bottom: 20px;
+        }
+        
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        input[type="text"], select {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            background-color: var(--current-bg);
+            color: var(--current-text);
+            font-size: 14px;
+            height: 40px;
+            transition: border-color 0.2s;
+            -webkit-appearance: none; /* Remove estilo nativo do iOS/Chrome */
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: var(--color-primary);
+        }
+
+        label {
+            font-size: 14px;
+            color: var(--current-info-text);
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--current-text);
+            margin-bottom: 10px;
+        }
+        
+        h3 {
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--current-text);
+            margin-top: 0;
+        }
+
+        .header-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+        }
+
+        .btn-neutral {
+            background-color: var(--color-neutral);
+            color: white;
+        }
+        
+        .result-box {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .result-juros {
+            background-color: #EFF6FF;
+            border: 2px solid var(--color-primary);
+        }
+        
+        body.dark-mode .result-juros {
+            background-color: #1E3A8A;
+        }
+
+        .result-taxa, .result-indices-bg {
+            background-color: #F0FDF4;
+            border: 2px solid var(--color-success);
+        }
+
+        body.dark-mode .result-taxa, body.dark-mode .result-indices-bg {
+             background-color: #14532D;
+        }
+
+        .result-value {
+            font-size: 32px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        
+        .result-label {
+            font-size: 14px;
+            color: var(--current-info-text);
+        }
+        
+        .result-juros .result-value { color: var(--color-primary); }
+        .result-taxa .result-value, .result-indices-bg .result-value { color: var(--color-success); }
+        
+        .input-group {
+            display: flex;
+        }
+        .input-group select {
+            flex: 0 0 100px;
+            margin-right: 5px;
+        }
+        .input-group input {
+            flex-grow: 1;
+        }
+        
+        /* Estilos da Tabela (Histórico/Empréstimo) */
+        .table-container {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+        }
+
+        .table-header {
+            display: flex;
+            background-color: var(--color-primary);
+            color: white;
+            font-weight: bold;
+            padding: 10px;
+        }
+
+        .table-row {
+            display: flex;
+            padding: 8px 10px;
+            border-bottom: 1px solid var(--color-hover);
+        }
+
+        .table-row:nth-child(even) {
+            background-color: var(--color-hover);
+        }
+
+        .table-cell {
+            flex: 1;
+            text-align: center;
+            font-size: 12px;
+            padding: 2px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+        }
+        
+        /* Estilos da Calculadora */
+        #calc_buttons {
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); 
+            gap: 10px;
+        }
+        
+        .calc-btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 22px;
+            color: white;
+            height: 60px;
+            transition: opacity 0.1s;
+        }
+        .calc-btn:active { opacity: 0.8; }
+        .calc-num { background-color: #3B8ED0; }
+        .calc-op { background-color: #F59E0B; }
+        .calc-clear { background-color: #EF4444; }
+        .calc-eq { background-color: #10B981; }
+
+        /* Estilos de Card de Resultados (Índices) */
+        .indices-card {
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: none;
+            border: 2px solid;
+            background-color: var(--current-card-bg);
+            margin: 0;
+        }
+        .indices-card-value { font-size: 24px; font-weight: bold; margin-top: 5px; }
+
     </style>
 </head>
-<body>
+<body class="light-mode">
+    <div id="app">
+        <div id="content-container">
+            
+            <div id="cartao" class="screen active">
+                <div class="header-section">
+                    <h2>💳 À Vista ou Parcelado?</h2>
+                    <button class="btn btn-neutral" onclick="limparCampos('cartao')">Limpar Tudo</button>
+                </div>
+                <p style="color: var(--current-info-text); font-size: 12px;">Descubra qual é a taxa de juros escondida quando a loja diz 'sem juros'.</p>
 
-<aside>
-    <div class="brand"><i class="fas fa-wallet"></i> Finanças Pro</div>
-    <nav>
-        <button class="active" onclick="app.showPage('cartao')">
-            <i class="fas fa-credit-card"></i> <span>Cartão</span>
-        </button>
-        <button onclick="app.showPage('financiamento')">
-            <i class="fas fa-percentage"></i> <span>Juros</span>
-        </button>
-        <button onclick="app.showPage('emprestimo')">
-            <i class="fas fa-hand-holding-dollar"></i> <span>Empréstimo</span>
-        </button>
-        <button onclick="app.showPage('indices')">
-            <i class="fas fa-chart-line"></i> <span>Índices</span>
-        </button>
-        <button onclick="app.showPage('calculadora')">
-            <i class="fas fa-calculator"></i> <span>Calculadora</span>
-        </button>
-    </nav>
-    <div class="footer">v2.19 PWA</div>
-</aside>
-
-<main>
-    <div id="cartao" class="page active">
-        <div class="header-bar">
-            <h1><i class="fas fa-credit-card"></i> À Vista ou Parcelado?</h1>
-        </div>
-        <div class="card">
-            <div class="form-grid">
-                <div>
+                <div class="card grid-layout">
                     <div class="form-group">
-                        <label>Valor da Compra</label>
-                        <input type="tel" id="c_compra" placeholder="R$ 0,00" oninput="maskMoney(this); cartao.calcular()">
+                        <label>Valor da Etiqueta (R$):</label>
+                        <input type="text" id="cartao_compra" value="" placeholder="R$ 0,00" onkeyup="mascaraEntrada(this, 'money'); calcularCartao()">
                     </div>
                     <div class="form-group">
-                        <label>Desconto Pagto Pix</label>
+                        <label>Desconto no Pix:</label>
                         <div class="input-group">
-                            <select id="c_tipo_desc" style="width: 120px;" onchange="cartao.limparDesconto()">
-                                <option value="%">%</option>
-                                <option value="R$ Desc.">R$ Desc.</option>
-                                <option value="Valor Final">Valor Final</option>
+                            <select id="cartao_tipo" onchange="calcularCartao()">
+                                <option>%</option>
+                                <option>R$ Desc</option>
+                                <option>Valor Final</option>
                             </select>
-                            <input type="tel" id="c_desconto" oninput="cartao.maskDesc(this); cartao.calcular()" onblur="cartao.formatDesc(this)">
+                            <input type="text" id="cartao_desc" value="" placeholder="0,00" onkeyup="mascaraEntrada(this, 'float'); calcularCartao()">
+                        </div>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Quantas vezes (s/ juros)?</label>
+                        <input type="text" id="cartao_parc" value="1" onkeyup="calcularCartao()">
+                    </div>
+                </div>
+
+                <div class="card grid-layout" style="grid-template-columns: 1fr 1fr;">
+                    <div style="text-align: center;">
+                        <label style="color: var(--current-text);">Valor Real à Vista:</label>
+                        <div id="res_pix" class="result-value" style="color: var(--color-success); font-size: 24px;">R$ 0,00</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <label style="color: var(--current-text);">Valor da Parcela:</label>
+                        <div id="res_parc" class="result-value" style="color: var(--color-primary); font-size: 24px;">R$ 0,00</div>
+                    </div>
+                </div>
+
+                <div class="result-box result-taxa">
+                    <div class="result-label" style="color: var(--color-success);">Juros Reais que você paga (ao não comprar à vista)</div>
+                    <div id="res_taxa" class="result-value">0,00 % ao mês</div>
+                </div>
+            </div>
+
+            <div id="juros" class="screen">
+                <div class="header-section">
+                    <h2>📊 Calculadora de Juros</h2>
+                    <button class="btn btn-neutral" onclick="limparCampos('juros')">Limpar</button>
+                </div>
+                <p style="color: var(--current-info-text);">Escolha o que você não sabe e quer descobrir:</p>
+                
+                <div class="card">
+                    <div style="display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px;">
+                        <div class="form-group" style="flex-direction: row; align-items: center;">
+                            <input type="radio" id="tgt_pv" name="target" value="pv" checked onchange="updateJurosState()" style="width: 15px; height: 15px; margin: 0; padding: 0;"><label for="tgt_pv" style="color: var(--current-text); font-weight: normal; margin-left: 5px;">Valor Financiado</label>
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center;">
+                            <input type="radio" id="tgt_pmt" name="target" value="pmt" onchange="updateJurosState()" style="width: 15px; height: 15px; margin: 0; padding: 0;"><label for="tgt_pmt" style="color: var(--current-text); font-weight: normal; margin-left: 5px;">Valor da Parcela</label>
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: center;">
+                            <input type="radio" id="tgt_i" name="target" value="i" onchange="updateJurosState()" style="width: 15px; height: 15px; margin: 0; padding: 0;"><label for="tgt_i" style="color: var(--current-text); font-weight: normal; margin-left: 5px;">Taxa de Juros</label>
+                        </div>
+                    </div>
+
+                    <div class="grid-layout">
+                        <div class="form-group">
+                            <label id="lbl_pv" for="juros_pv">Valor Total (Financiado):</label>
+                            <input type="text" id="juros_pv" onkeyup="mascaraEntrada(this, 'money'); calcularJuros()" placeholder="R$ 0,00">
+                        </div>
+                        <div class="form-group">
+                            <label id="lbl_n" for="juros_n">Total de Meses:</label>
+                            <input type="text" id="juros_n" onkeyup="calcularJuros()" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label id="lbl_pmt" for="juros_pmt">Valor da Parcela:</label>
+                            <input type="text" id="juros_pmt" onkeyup="mascaraEntrada(this, 'money'); calcularJuros()" placeholder="R$ 0,00">
+                        </div>
+                        <div class="form-group">
+                            <label id="lbl_i" for="juros_i">Taxa de Juros (% a.m.):</label>
+                            <input type="text" id="juros_i" onkeyup="mascaraEntrada(this, 'float'); calcularJuros()" placeholder="0,00">
                         </div>
                     </div>
                 </div>
-                <div>
-                    <div class="form-group">
-                        <div class="result-label">Valor Pix (À vista)</div>
-                        <div id="c_res_pix" class="result-value text-success">R$ 0,00</div>
-                    </div>
-                    <hr style="border: 0; border-top: 1px solid #E2E8F0; margin: 15px 0;">
-                    <div class="form-group">
-                        <label>Qtd Parcelas sem juros</label>
-                        <input type="tel" id="c_parc" value="1" oninput="cartao.calcular()">
-                    </div>
-                    <div class="form-group">
-                        <div class="result-label">Valor da Parcela</div>
-                        <div id="c_res_parc" class="result-value text-primary">R$ 0,00</div>
-                    </div>
-                </div>
-            </div>
-            <div class="result-box">
-                <div style="font-size: 13px; color: #166534; margin-bottom: 5px;">Taxa Mensal Implícita</div>
-                <div id="c_res_taxa" style="font-size: 28px; color: #15803D; font-weight: bold;">0,00 %</div>
-            </div>
-            <button class="btn-secondary" onclick="cartao.limpar()"><i class="fas fa-eraser"></i> Limpar Campos</button>
-        </div>
-    </div>
 
-    <div id="financiamento" class="page">
-        <div class="header-bar">
-            <h1><i class="fas fa-percentage"></i> Calculadora de Juros</h1>
-        </div>
-        <div class="card">
-            <div class="form-group">
-                <label>O que você quer descobrir?</label>
-                <div class="radio-group">
-                    <label><input type="radio" name="f_target" value="pv" onchange="finan.updateState()"> Valor Financiado</label>
-                    <label><input type="radio" name="f_target" value="pmt" onchange="finan.updateState()"> Valor Parcela</label>
-                    <label><input type="radio" name="f_target" value="i" checked onchange="finan.updateState()"> Taxa Juros</label>
+                <div class="result-box result-juros">
+                    <div id="lbl_total" class="result-value" style="color: var(--color-primary);">Preencha os campos...</div>
                 </div>
             </div>
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Valor Financ. (PV)</label>
-                    <input type="tel" id="f_pv" placeholder="R$ 0,00" oninput="maskMoney(this); finan.calc()">
-                </div>
-                <div class="form-group">
-                    <label>Nº Meses (N)</label>
-                    <input type="tel" id="f_n" oninput="finan.calc()">
-                </div>
-                <div class="form-group">
-                    <label>Valor Parcela (PMT)</label>
-                    <input type="tel" id="f_pmt" placeholder="R$ 0,00" oninput="maskMoney(this); finan.calc()">
-                </div>
-                <div class="form-group">
-                    <label>Taxa Mensal (%)</label>
-                    <input type="tel" id="f_i" placeholder="0,00" oninput="finan.calc()" onblur="formatPercentage(this)">
-                </div>
-            </div>
-            <div class="result-box blue">
-                <div id="f_res_total" style="font-size: 18px; color: var(--primary); font-weight: bold;">Total Pago: R$ 0,00</div>
-            </div>
-            <button class="btn-secondary" onclick="finan.limpar()"><i class="fas fa-eraser"></i> Limpar Campos</button>
-        </div>
-    </div>
 
-    <div id="emprestimo" class="page">
-        <div class="header-bar">
-            <h1><i class="fas fa-hand-holding-dollar"></i> Simulador de Empréstimo</h1>
-        </div>
-        <div class="card">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Capital Solicitado</label>
-                    <input type="tel" id="e_capital" placeholder="R$ 0,00" oninput="maskMoney(this)">
+            <div id="emprestimo" class="screen">
+                <div class="header-section">
+                    <h2>💸 Simulador de Empréstimo</h2>
+                    <button class="btn btn-neutral" onclick="limparCampos('emprestimo')">Limpar</button>
                 </div>
-                <div class="form-group">
-                    <label>Nº Parcelas</label>
-                    <input type="tel" id="e_n">
+
+                <div class="card">
+                    <div class="grid-layout">
+                        <div class="form-group">
+                            <label>Valor Emprestado:</label>
+                            <input type="text" id="emprestimo_pv" placeholder="R$ 0,00" onkeyup="mascaraEntrada(this, 'money')">
+                        </div>
+                        <div class="form-group">
+                            <label>Quantas Parcelas:</label>
+                            <input type="text" id="emprestimo_n" placeholder="0">
+                        </div>
+                        <div class="form-group">
+                            <label>Taxa de Juros (%):</label>
+                            <input type="text" id="emprestimo_i" placeholder="0,00" onkeyup="mascaraEntrada(this, 'float')">
+                        </div>
+                        <div class="form-group">
+                            <label>Data 1ª Parcela:</label>
+                            <input type="text" id="emprestimo_dt" placeholder="DD/MM/AAAA" onkeyup="mascaraEntrada(this, 'date')">
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label>Tipo de Parcelas:</label>
+                        <select id="emprestimo_cmb">
+                            <option value="SAC">SAC (Parcelas Caem)</option>
+                            <option value="PRICE">PRICE (Parcelas Fixas)</option>
+                        </select>
+                        <span style="font-size: 11px; color: var(--current-info-text); margin-top: 5px;">
+                            ℹ️ SAC: Começa caro e barateia. PRICE: Valor fixo todo mês.
+                        </span>
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn" style="flex: 1; background-color: var(--color-primary); color: white;" onclick="gerarTabelaEmprestimo()">Gerar Tabela</button>
+                        <button class="btn" style="background-color: var(--color-success); color: white;" id="btn_export_emprestimo" onclick="exportarTabela('emprestimo')" disabled>Exportar Excel</button>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <label>Taxa Juros (% a.m.)</label>
-                    <input type="tel" id="e_taxa" placeholder="0,00" onblur="formatPercentage(this)">
+
+                <div class="card" id="tabela_emprestimo_container">
+                    <h3>Cronograma (Simulação)</h3>
+                    <p style="color: var(--current-info-text);">A tabela de simulação aparecerá aqui após clicar em "Gerar Tabela".</p>
                 </div>
-                <div class="form-group">
-                    <label>1ª Parcela (DD/MM/AAAA)</label>
-                    <input type="tel" id="e_dt_primeira" oninput="maskDate(this)" placeholder="DD/MM/AAAA">
+            </div>
+
+            <div id="indices" class="screen">
+                <h2>📈 Índices Econômicos</h2>
+                
+                <div class="card">
+                    <div style="display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px;">
+                        <select id="indices_cmb" onchange="updateIndicesLabels()" style="flex-grow: 1; min-width: 150px;">
+                            <option value="196">Poupança</option><option value="4391">CDI</option><option value="4390">SELIC</option>
+                            <option value="433">IPCA</option><option value="189">IGP-M</option><option value="1">Dólar</option>
+                            <option value="25463">Cheque Especial</option><option value="226">TR</option><option value="188">INPC</option>
+                            <option value="25464">Crédito Pessoal</option>
+                        </select>
+                        <input type="text" id="indices_m" value="12" style="width: 60px;">
+                        <label style="color: var(--current-text); margin-right: 10px;" id="lbl_m">Últimos (meses):</label>
+                        <button class="btn" style="background-color: var(--color-primary); color: white;" id="btn_buscar_indices" onclick="buscarIndices()">Buscar</button>
+                    </div>
+                    <p style="color: var(--current-info-text); font-size: 12px; margin-top: 10px;" id="lbl_desc">Rendimento mensal oficial da poupança.</p>
                 </div>
-                <div class="form-group">
-                    <label>Sistema de Amortização</label>
-                    <select id="e_metodo">
-                        <option value="SAC">SAC (Parcelas Decrescentes)</option>
-                        <option value="PRICE">PRICE (Parcelas Fixas)</option>
-                    </select>
+                
+                <div class="grid-layout" style="grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));">
+                    <div id="card_media" class="indices-card" style="border-color: var(--color-primary);">
+                        <div style="color: gray; font-weight: bold;">Média</div>
+                        <div class="indices-card-value" style="color: var(--color-primary);">...</div>
+                    </div>
+                     <div id="card_acumulado" class="indices-card" style="border-color: var(--color-success);">
+                        <div style="color: gray; font-weight: bold;">Acumulado</div>
+                        <div class="indices-card-value" style="color: var(--color-success);">...</div>
+                    </div>
+                     <div id="card_max" class="indices-card" style="border-color: var(--color-warning);">
+                        <div style="color: gray; font-weight: bold;">Maior Valor</div>
+                        <div class="indices-card-value" style="color: var(--color-warning);">...</div>
+                    </div>
+                     <div id="card_min" class="indices-card" style="border-color: var(--color-danger);">
+                        <div style="color: gray; font-weight: bold;">Menor Valor</div>
+                        <div class="indices-card-value" style="color: var(--color-danger);">...</div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin: 20px 0;">
+                    <button class="btn" style="flex: 1; background-color: var(--color-neutral); color: white;" id="btn_graph_indices" disabled>📊 Ver Gráfico</button>
+                    <button class="btn" style="background-color: var(--color-success); color: white;" id="btn_export_indices" onclick="exportarTabela('indices')" disabled>Exportar Excel</button>
+                </div>
+                
+                <div class="card" id="historico_indices_container">
+                    <h3>Histórico</h3>
+                    <p style="color: var(--current-info-text);">O histórico do índice aparecerá aqui.</p>
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
-                <button class="btn-primary" onclick="emprestimo.gerar()">Gerar Tabela</button>
-                <button class="btn-secondary" onclick="emprestimo.limpar()">Limpar</button>
-            </div>
-        </div>
-        
-        <div class="table-container">
-            <div class="table-scroll">
-                <table id="e_tabela">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Vencimento</th>
-                            <th>Juros</th>
-                            <th>Amort</th>
-                            <th>Prest</th>
-                            <th>Saldo</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-    <div id="indices" class="page">
-        <div class="header-bar">
-            <h1><i class="fas fa-chart-line"></i> Índices Econômicos</h1>
-        </div>
-        <div class="card">
-            <div class="form-grid">
-                <div class="form-group">
-                    <label>Indicador</label>
-                    <select id="i_indicador">
-                        <option value="196">Poupança (Rentab. Mensal)</option>
-                        <option value="4391">CDI (Taxa Mensal)</option>
-                        <option value="4390">SELIC (Meta Mensal)</option>
-                        <option value="433">IPCA (Inflação Mensal)</option>
-                        <option value="189">IGP-M (Inflação Mensal)</option>
-                        <option value="25463">Cheque Especial (PF - Mensal)</option>
-                        <option value="1">Dólar (Venda PTAX)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Últimos (meses)</label>
-                    <input type="tel" id="i_meses" value="12">
+            <div id="calc" class="screen">
+                <h2>🧮 Calculadora</h2>
+                <div style="max-width: 350px; margin: 0 auto;">
+                    <div class="card">
+                        <div id="calc_tape" style="height: 120px; overflow-y: auto; background-color: var(--current-bg); border-radius: 4px; padding: 5px; margin-bottom: 5px; font-family: 'Courier New', monospace;">
+                        </div>
+                        <div id="calc_disp" style="font-size: 48px; font-weight: bold; text-align: right; height: 70px; padding: 10px 15px; margin-bottom: 10px; color: var(--current-text); overflow-x: auto;">0,00</div>
+                        
+                        <div id="calc_buttons">
+                            <button class="calc-btn calc-clear" onclick="calcClick('C')">C</button>
+                            <button class="calc-btn calc-op" onclick="calcClick('%')">%</button>
+                            <button class="calc-btn calc-op" onclick="calcClick('⌫')">⌫</button>
+                            <button class="calc-btn calc-op" onclick="calcClick('/')">/</button>
+                            
+                            <button class="calc-btn calc-num" onclick="calcClick('7')">7</button>
+                            <button class="calc-btn calc-num" onclick="calcClick('8')">8</button>
+                            <button class="calc-btn calc-num" onclick="calcClick('9')">9</button>
+                            <button class="calc-btn calc-op" onclick="calcClick('*')">*</button>
+                            
+                            <button class="calc-btn calc-num" onclick="calcClick('4')">4</button>
+                            <button class="calc-btn calc-num" onclick="calcClick('5')">5</button>
+                            <button class="calc-btn calc-num" onclick="calcClick('6')">6</button>
+                            <button class="calc-btn calc-op" onclick="calcClick('-')">-</button>
+                            
+                            <button class="calc-btn calc-num" onclick="calcClick('1')">1</button>
+                            <button class="calc-btn calc-num" onclick="calcClick('2')">2</button>
+                            <button class="calc-btn calc-num" onclick="calcClick('3')">3</button>
+                            <button class="calc-btn calc-op" onclick="calcClick('+')">+</button>
+                            
+                            <button class="calc-btn calc-num" style="grid-column: span 2;" onclick="calcClick('0')">0</button>
+                            <button class="calc-btn calc-num" onclick="calcClick(',')">,</button>
+                            <button class="calc-btn calc-eq" onclick="calcClick('=')">=</button>
+                        </div>
+                    </div>
+                     <button class="btn btn-neutral" style="width: 100%; margin-top: 10px;" onclick="copyResult()">Copiar Resultado</button>
                 </div>
             </div>
             
-            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px;">
-                <button class="btn-primary" onclick="indices.buscar()">Consultar Online</button>
-                <button class="btn-secondary" onclick="indices.limpar()">Limpar</button>
+            <div id="config" class="screen">
+                <h2>⚙️ Configurações</h2>
+                <div class="card">
+                    <h3>🎨 Tema do Aplicativo:</h3>
+                    <div class="segmented-btn-group" id="theme-switcher" style="display: flex; border: 1px solid var(--color-primary); border-radius: 6px; overflow: hidden; margin-bottom: 20px;">
+                        <div class="segmented-btn" data-value="Light" onclick="changeTheme('Light')" style="flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; background-color: var(--current-card-bg); color: var(--color-primary);">Light</div>
+                        <div class="segmented-btn" data-value="Dark" onclick="changeTheme('Dark')" style="flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; background-color: var(--current-card-bg); color: var(--color-primary);">Dark</div>
+                        <div class="segmented-btn active" data-value="System" onclick="changeTheme('System')" style="flex: 1; text-align: center; padding: 10px; cursor: pointer; font-weight: bold; background-color: var(--color-primary); color: white;">System</div>
+                    </div>
+                    
+                    <h3>🔍 Zoom (Tamanho da Interface):</h3>
+                    <div class="segmented-btn-group" id="zoom-switcher" style="display: flex; border: 1px solid var(--color-primary); border-radius: 6px; overflow: hidden; margin-bottom: 20px;">
+                        <div class="segmented-btn" data-value="80%" onclick="changeZoom('80%')">80%</div>
+                        <div class="segmented-btn active" data-value="100%" onclick="changeZoom('100%')">100%</div>
+                        <div class="segmented-btn" data-value="110%" onclick="changeZoom('110%')">110%</div>
+                        <div class="segmented-btn" data-value="125%" onclick="changeZoom('125%')">125%</div>
+                    </div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <h3 style="color: var(--color-primary);">Finanças PRO v3.13 - <span id="data_versao"></span></h3>
+                    <p style="color: var(--current-info-text);">(C) 2025 - Aguinaldo Liesack Baptistini</p>
+                </div>
             </div>
 
-            <div class="summary-cards" style="margin-top: 20px;">
-                <div class="s-card" style="border-color: var(--primary);">
-                    <h4>Média Período</h4>
-                    <div id="i_media" style="color: var(--primary);">...</div>
-                </div>
-                <div class="s-card" style="border-color: var(--success);">
-                    <h4 id="i_lbl_acum">Acumulado</h4>
-                    <div id="i_acum" style="color: var(--success);">...</div>
-                </div>
-                <div class="s-card" style="border-color: var(--warning);">
-                    <h4>Maior Valor</h4>
-                    <div id="i_max" style="color: var(--warning);">...</div>
-                </div>
+        </div>
+
+        <div id="navbar">
+            <div class="nav-btn active" data-target="cartao">
+                <span class="btn-icon">💳</span>
+                <span>À Vista / Parc</span>
+            </div>
+            <div class="nav-btn" data-target="juros">
+                <span class="btn-icon">📊</span>
+                <span>Calc. Juros</span>
+            </div>
+            <div class="nav-btn" data-target="emprestimo">
+                <span class="btn-icon">💸</span>
+                <span>Empréstimo</span>
+            </div>
+            <div class="nav-btn" data-target="indices">
+                <span class="btn-icon">📈</span>
+                <span>Índices Econ.</span>
+            </div>
+            <div class="nav-btn" data-target="calc">
+                <span class="btn-icon">🧮</span>
+                <span>Calculadora</span>
+            </div>
+             <div class="nav-btn" data-target="config">
+                <span class="btn-icon">⚙️</span>
+                <span>Config.</span>
             </div>
         </div>
+    </div>
+
+    <script>
+        // =====================================================================
+        // JAVASCRIPT: UTILS, NAVEGAÇÃO E LÓGICA DE NEGÓCIO
+        // =====================================================================
+
+        const INDICES_DESCRICOES = {
+            "196": "Rendimento mensal oficial da poupança.", "4391": "Taxa usada entre bancos. Referência para Renda Fixa.",
+            "4390": "Taxa básica de juros da economia.", "433": "Índice oficial da inflação no Brasil.",
+            "189": "Inflação do aluguel.", "1": "Cotação de venda do Dólar Comercial.",
+            "25463": "Taxa média de juros cobrada no cheque especial (PF).", "226": "Taxa Referencial. Corrige saldo do FGTS.",
+            "188": "Inflação para famílias de baixa renda.", "25464": "Taxa média para empréstimo pessoal não consignado."
+        };
+        const INDICES_NOMES = {
+             "196": "Poupança", "4391": "CDI", "4390": "SELIC", "433": "IPCA", 
+            "189": "IGP-M", "1": "Dólar", "25463": "Cheque Especial", 
+            "226": "TR", "188": "INPC", "25464": "Crédito Pessoal"
+        };
+        let currentIndicesData = []; // Para armazenar dados para gráfico/exportação
+        let currentIndicesName = "";
         
-        <div class="table-container">
-            <div class="table-scroll">
-                <table id="i_tabela">
-                    <thead>
-                        <tr>
-                            <th>Data</th>
-                            <th style="text-align: right;">Valor</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+        // --- MÁSCARAS E PARSERS ---
 
-    <div id="calculadora" class="page">
-        <div class="header-bar">
-            <h1><i class="fas fa-calculator"></i> Calculadora</h1>
-        </div>
-        <div class="calc-container">
-            <div class="calc-screen">
-                <div id="calc-tape" class="calc-tape"></div>
-                <div id="calc-current" class="calc-current">0</div>
-            </div>
-
-            <div class="calc-grid">
-                <button class="calc-btn cl" onclick="calcBasic.clear()">C</button>
-                <button class="calc-btn op" onclick="calcBasic.append('/')">÷</button>
-                <button class="calc-btn op" onclick="calcBasic.append('*')">×</button>
-                <button class="calc-btn op" onclick="calcBasic.backspace()">⌫</button>
-                
-                <button class="calc-btn" onclick="calcBasic.append('7')">7</button>
-                <button class="calc-btn" onclick="calcBasic.append('8')">8</button>
-                <button class="calc-btn" onclick="calcBasic.append('9')">9</button>
-                <button class="calc-btn op" onclick="calcBasic.append('-')">-</button>
-                
-                <button class="calc-btn" onclick="calcBasic.append('4')">4</button>
-                <button class="calc-btn" onclick="calcBasic.append('5')">5</button>
-                <button class="calc-btn" onclick="calcBasic.append('6')">6</button>
-                <button class="calc-btn op" onclick="calcBasic.append('+')">+</button>
-                
-                <button class="calc-btn" onclick="calcBasic.append('1')">1</button>
-                <button class="calc-btn" onclick="calcBasic.append('2')">2</button>
-                <button class="calc-btn" onclick="calcBasic.append('3')">3</button>
-                <button class="calc-btn" onclick="calcBasic.append('.')">,</button>
-                
-                <button class="calc-btn" onclick="calcBasic.append('0')" style="grid-column: span 2;">0</button>
-                <button class="calc-btn eq" onclick="calcBasic.calculate()">=</button>
-            </div>
-            <button class="btn-secondary" style="margin-top: 15px;" onclick="calcBasic.copyToClipboard()"><i class="fas fa-copy"></i> Copiar Resultado</button>
-        </div>
-    </div>
-
-</main>
-
-<script>
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js'));
-    }
-
-    /* --- UTILS --- */
-    function parseMoney(val) {
-        if (!val) return 0;
-        let clean = val.replace(/\D/g, '');
-        return parseFloat(clean) / 100;
-    }
-    function formatMoney(val) {
-        return val.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-    }
-    function parseFloatBr(val) {
-        if (!val) return 0;
-        return parseFloat(val.replace(/\./g, '').replace(',', '.'));
-    }
-    function maskMoney(input) {
-        let value = input.value.replace(/\D/g, '');
-        value = (parseInt(value) / 100).toFixed(2) + '';
-        value = value.replace('.', ',');
-        value = value.replace(/(\d)(?=(\d{3})+(?!\d))/g, '$1.');
-        input.value = value === 'NaN' ? '' : 'R$ ' + value;
-    }
-    function maskDate(input) {
-        let v = input.value.replace(/\D/g, '').slice(0, 8);
-        if (v.length >= 5) input.value = `${v.slice(0,2)}/${v.slice(2,4)}/${v.slice(4)}`;
-        else if (v.length >= 3) input.value = `${v.slice(0,2)}/${v.slice(2)}`;
-        else input.value = v;
-    }
-    function formatPercentage(input) {
-        let val = input.value.replace(',', '.');
-        val = val.replace(/[^0-9.]/g, '');
-        if(!val) return;
-        let floatVal = parseFloat(val);
-        if(isNaN(floatVal)) return;
-        input.value = floatVal.toFixed(2).replace('.', ',');
-        if(input.id === 'f_i') finan.calc();
-    }
-    function maskFloat(input) {
-        let v = input.value.replace(/[^0-9,.]/g, '');
-        input.value = v;
-    }
-    function parseDate(str) {
-        const parts = str.split('/');
-        return new Date(parts[2], parts[1] - 1, parts[0]);
-    }
-    function formatDate(date) {
-        const d = date.getDate().toString().padStart(2, '0');
-        const m = (date.getMonth() + 1).toString().padStart(2, '0');
-        const y = date.getFullYear();
-        return `${d}/${m}/${y}`;
-    }
-    function addMonth(date, months) {
-        let d = new Date(date);
-        let targetMonth = d.getMonth() + months;
-        let year = d.getFullYear() + Math.floor(targetMonth / 12);
-        let month = ((targetMonth % 12) + 12) % 12;
-        let day = d.getDate();
-        let lastDay = new Date(year, month + 1, 0).getDate();
-        d.setFullYear(year, month, Math.min(day, lastDay));
-        return d;
-    }
-
-    /* --- NAV --- */
-    const app = {
-        showPage: (id) => {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            const navs = document.querySelectorAll('nav button');
-            if(id === 'cartao') navs[0].classList.add('active');
-            if(id === 'financiamento') navs[1].classList.add('active');
-            if(id === 'emprestimo') navs[2].classList.add('active');
-            if(id === 'indices') navs[3].classList.add('active');
-            if(id === 'calculadora') navs[4].classList.add('active');
+        // Converte string formatada BR (1.000,00) para float (1000.00)
+        function parseVal(str) {
+            if (!str) return 0.0;
+            return parseFloat(str.replace('R$', '').replace(/[.]/g, '').replace(',', '.').replace('%', '').trim()) || 0.0;
         }
-    };
 
-    /* --- CARTAO --- */
-    const cartao = {
-        limpar: () => {
-            document.getElementById('c_compra').value = '';
-            document.getElementById('c_desconto').value = '';
-            document.getElementById('c_parc').value = '1';
-            document.getElementById('c_tipo_desc').value = '%';
-            document.getElementById('c_res_pix').innerText = 'R$ 0,00';
-            document.getElementById('c_res_parc').innerText = 'R$ 0,00';
-            document.getElementById('c_res_taxa').innerText = '0,00 %';
-        },
-        limparDesconto: () => {
-            document.getElementById('c_desconto').value = '';
-            cartao.calcular();
-        },
-        maskDesc: (input) => {
-            const tipo = document.getElementById('c_tipo_desc').value;
-            if (tipo === '%') { maskFloat(input); } else maskMoney(input);
-        },
-        formatDesc: (input) => {
-            const tipo = document.getElementById('c_tipo_desc').value;
-            if (tipo === '%') { formatPercentage(input); cartao.calcular(); }
-        },
-        calcular: () => {
-            const compra = parseMoney(document.getElementById('c_compra').value);
-            const tipo = document.getElementById('c_tipo_desc').value;
-            let descStr = document.getElementById('c_desconto').value;
-            let pix = 0, descVal = 0;
-            if (tipo === '%') {
-                descVal = parseFloatBr(descStr);
-                pix = compra * (1 - descVal / 100);
+        // Converte float para string monetária BR (R$ 1.000,00)
+        function fmtMoney(val) {
+            return `R$ ${val.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        }
+        
+        // Converte float para string porcentual BR (1,2345%)
+        function fmtPercent(val, digits = 4) {
+            return val.toLocaleString('pt-BR', { minimumFractionDigits: digits, maximumFractionDigits: digits });
+        }
+        
+        function getProxMesData() {
+            const proxMes = new Date();
+            proxMes.setDate(proxMes.getDate() + 30);
+            const dia = String(proxMes.getDate()).padStart(2, '0');
+            const mes = String(proxMes.getMonth() + 1).padStart(2, '0');
+            const ano = proxMes.getFullYear();
+            return `${dia}/${mes}/${ano}`;
+        }
+        
+        // Simulação da MaskEntry do Python
+        function mascaraEntrada(element, type) {
+            let val = element.value.replace('R$', '').replace('%', '').replace(/\./g, '').replace(',', '');
+            let clean = val.replace(/[^0-9]/g, '');
+
+            if (!clean) return;
+
+            let formatted = clean;
+            if (type === 'money' || type === 'float') {
+                const num = parseInt(clean) / 100;
+                formatted = num.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                if (type === 'money') formatted = 'R$ ' + formatted;
+            } else if (type === 'date') {
+                clean = clean.substring(0, 8);
+                if (clean.length > 4) formatted = `${clean.substring(0, 2)}/${clean.substring(2, 4)}/${clean.substring(4)}`;
+                else if (clean.length > 2) formatted = `${clean.substring(0, 2)}/${clean.substring(2)}`;
+            }
+
+            element.value = formatted;
+        }
+
+        // --- NAVEGAÇÃO ---
+
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('data_versao').innerText = new Date().toLocaleDateString('pt-BR');
+            document.getElementById('emprestimo_dt').value = getProxMesData(); // Data 1ª Parcela
+
+            document.querySelectorAll('.nav-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    showScreen(this.dataset.target);
+                });
+            });
+            
+            // Inicializa o estado
+            loadState();
+            changeTheme(localStorage.getItem('appTheme') || 'System');
+            changeZoom(localStorage.getItem('appZoom') || '100%');
+            showScreen('cartao'); // Tela inicial
+            updateJurosState(); // Inicializa estado dos juros
+        });
+        
+        function showScreen(targetId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(targetId).classList.add('active');
+
+            document.querySelectorAll('.nav-btn').forEach(button => {
+                button.classList.remove('active');
+                if (button.dataset.target === targetId) {
+                    button.classList.add('active');
+                }
+            });
+        }
+        
+        // --- PERSISTÊNCIA (Local Storage - Simula o SQLite) ---
+        
+        function saveState() {
+            document.querySelectorAll('input[type="text"], select').forEach(el => {
+                localStorage.setItem(el.id, el.value);
+            });
+             document.querySelectorAll('input[type="radio"]').forEach(el => {
+                if(el.checked) localStorage.setItem(el.name, el.value);
+            });
+        }
+        
+        function loadState() {
+            document.querySelectorAll('input[type="text"], select').forEach(el => {
+                const savedValue = localStorage.getItem(el.id);
+                if (savedValue !== null) {
+                    el.value = savedValue;
+                    if (el.onkeyup) el.onkeyup(); // Recalcula máscaras/campos
+                }
+            });
+             document.querySelectorAll('input[type="radio"]').forEach(el => {
+                const savedValue = localStorage.getItem(el.name);
+                if (savedValue !== null && el.value === savedValue) {
+                    el.checked = true;
+                }
+            });
+        }
+
+        window.onbeforeunload = saveState; // Salva o estado ao fechar
+        
+        function limparCampos(screenId) {
+            document.querySelectorAll(`#${screenId} input[type="text"]`).forEach(input => {
+                if (input.id.endsWith('_parc') || input.id.endsWith('_n')) {
+                    input.value = "1";
+                } else if (input.id.endsWith('_dt')) {
+                    input.value = getProxMesData();
+                } else {
+                    input.value = "";
+                }
+            });
+            
+            if (screenId === 'cartao') calcularCartao();
+            if (screenId === 'juros') {
+                document.getElementById('tgt_pv').checked = true;
+                updateJurosState();
+            }
+            if (screenId === 'emprestimo') {
+                const container = document.getElementById('tabela_emprestimo_container');
+                container.innerHTML = '<h3>Cronograma (Simulação)</h3><p style="color: var(--current-info-text);">A tabela de simulação aparecerá aqui após clicar em "Gerar Tabela".</p>';
+                document.getElementById('btn_export_emprestimo').disabled = true;
+            }
+        }
+        
+        // --- TELA 6: CONFIGURAÇÕES (Tema) ---
+
+        function changeTheme(theme) {
+            const body = document.body;
+            let finalTheme = theme;
+            
+            if (theme === 'System') {
+                finalTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'Dark' : 'Light';
+            }
+            
+            body.classList.remove('light-mode', 'dark-mode');
+            if (finalTheme === 'Dark') {
+                body.classList.add('dark-mode');
             } else {
-                descVal = parseMoney(descStr);
-                if (tipo === 'R$ Desc.') pix = compra - descVal; else pix = descVal;
+                body.classList.add('light-mode');
+            }
+            
+            document.querySelectorAll('#theme-switcher .segmented-btn').forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.backgroundColor = 'var(--current-card-bg)';
+                btn.style.color = 'var(--color-primary)';
+                if (btn.dataset.value === theme) {
+                    btn.classList.add('active');
+                    btn.style.backgroundColor = 'var(--color-primary)';
+                    btn.style.color = 'white';
+                }
+            });
+            
+            localStorage.setItem('appTheme', theme);
+        }
+        
+        function changeZoom(zoom) {
+            const scale = parseFloat(zoom.replace('%', '')) / 100;
+            document.documentElement.style.fontSize = `${scale * 100}%`; 
+            
+            document.querySelectorAll('#zoom-switcher .segmented-btn').forEach(btn => {
+                btn.classList.remove('active');
+                 if (btn.dataset.value === zoom) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            localStorage.setItem('appZoom', zoom);
+        }
+
+        // --- TELA 1: CARTÃO ---
+
+        function calcularCartao() {
+            const compra = parseVal(document.getElementById('cartao_compra').value);
+            let qtd = parseInt(document.getElementById('cartao_parc').value) || 1;
+            if (qtd < 1) qtd = 1;
+
+            const tipo = document.getElementById('cartao_tipo').value;
+            const descRaw = parseVal(document.getElementById('cartao_desc').value);
+
+            let pix = compra;
+            if (tipo === '%') {
+                pix = compra * (1 - descRaw / 100);
+            } else if (tipo === 'R$ Desc') {
+                pix = compra - descRaw;
+            } else { // Valor Final
+                pix = descRaw;
             }
             if (pix < 0) pix = 0;
-            let qtd = parseInt(document.getElementById('c_parc').value) || 1;
-            if (qtd < 1) qtd = 1;
+
             const parc = compra / qtd;
-            document.getElementById('c_res_pix').innerText = formatMoney(pix);
-            document.getElementById('c_res_parc').innerText = formatMoney(parc);
+            document.getElementById('res_pix').innerText = fmtMoney(pix);
+            document.getElementById('res_parc').innerText = fmtMoney(parc);
+
             let taxa = 0;
-            if (pix > 0 && parc > 0 && qtd > 1) taxa = (Math.pow((parc * qtd) / pix, 1 / qtd) - 1) * 100;
-            document.getElementById('c_res_taxa').innerText = taxa.toFixed(4).replace('.', ',') + ' %';
-        }
-    };
+            if (pix > 0 && parc > 0 && qtd > 1) {
+                // TIR Simplificada (como no código Python)
+                taxa = (Math.pow((parc * qtd) / pix, 1 / qtd) - 1) * 100;
+            }
 
-    /* --- FINANCIAMENTO --- */
-    const finan = {
-        limpar: () => {
-            document.getElementById('f_pv').value = '';
-            document.getElementById('f_n').value = '';
-            document.getElementById('f_pmt').value = '';
-            document.getElementById('f_i').value = '';
-            finan.updateState();
-        },
-        updateState: () => {
-            const target = document.querySelector('input[name="f_target"]:checked').value;
-            const fields = ['f_pv', 'f_n', 'f_pmt', 'f_i'];
-            fields.forEach(id => {
-                const el = document.getElementById(id);
-                el.disabled = false; el.classList.remove('calculating');
-                if (id.includes(target)) {
-                    el.value = 'Calculando...'; el.disabled = true; el.classList.add('calculating');
-                } else { if (el.value === 'Calculando...') el.value = ''; }
-            });
-            finan.calc();
-        },
-        calc: () => {
-            const target = document.querySelector('input[name="f_target"]:checked').value;
-            const getVal = (id) => {
-                if (id === 'f_n') return parseInt(document.getElementById(id).value) || 0;
-                if (id === 'f_i') return parseFloatBr(document.getElementById(id).value) / 100;
-                return parseMoney(document.getElementById(id).value);
-            };
-            let pv = getVal('f_pv'), n = getVal('f_n'), pmt = getVal('f_pmt'), i = getVal('f_i');
+            document.getElementById('res_taxa').innerText = fmtPercent(taxa) + ' % ao mês';
+        }
+        
+        // --- TELA 2: JUROS ---
+        
+        const jurosFields = {
+            'pv': {label: 'Valor Total (Financiado):', input: 'juros_pv', type: 'money'},
+            'n': {label: 'Total de Meses:', input: 'juros_n', type: 'int'},
+            'pmt': {label: 'Valor da Parcela:', input: 'juros_pmt', type: 'money'},
+            'i': {label: 'Taxa de Juros (% a.m.):', input: 'juros_i', type: 'float'}
+        };
+        
+        function updateJurosState() {
+            const tgt = document.querySelector('input[name="target"]:checked').value;
+            
+            for (const key in jurosFields) {
+                const field = jurosFields[key];
+                const input = document.getElementById(field.input);
+                const label = document.getElementById(`lbl_${key}`);
+                
+                input.disabled = false;
+                input.style.color = 'var(--current-text)';
+                label.style.color = 'var(--current-info-text)';
+                label.style.fontWeight = 'bold';
+                
+                if (key === tgt) {
+                    input.disabled = true;
+                    input.value = "Calculando...";
+                    input.style.color = 'var(--color-danger)';
+                    label.style.color = 'var(--color-danger)';
+                    label.style.fontWeight = 'bold';
+                } else if (input.value === "Calculando...") {
+                    input.value = "";
+                }
+            }
+            calcularJuros();
+        }
+
+        function calcularJuros() {
+            const tgt = document.querySelector('input[name="target"]:checked').value;
+            const pv = parseVal(document.getElementById('juros_pv').value);
+            const n = parseInt(document.getElementById('juros_n').value) || 0;
+            const pmt = parseVal(document.getElementById('juros_pmt').value);
+            const i = parseVal(document.getElementById('juros_i').value) / 100;
+            
             let res = 0;
+            let resText = "Preencha os campos...";
+            
             try {
-                if (target === 'pmt' && i !== 0 && n > 0) res = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
-                else if (target === 'pv' && i !== 0 && n > 0) res = pmt * (Math.pow(1 + i, n) - 1) / (i * Math.pow(1 + i, n));
-                else if (target === 'i' && n > 0 && pv > 0 && pmt > 0) {
-                    let low = 0, high = 10; 
-                    for(let k=0; k<50; k++) {
-                       let mid = (low+high)/2;
-                       let calcPmt = pv * (mid * Math.pow(1+mid, n)) / (Math.pow(1+mid, n)-1);
-                       if(calcPmt > pmt) high = mid; else low = mid;
-                    }
-                    res = ((low+high)/2) * 100;
-                }
-                const resEl = document.getElementById('f_' + target);
-                if (res > 0) {
-                    if (target === 'i') resEl.value = res.toFixed(2).replace('.', ',');
-                    else resEl.value = formatMoney(res);
-                    let total = 0;
-                    if(n > 0) {
-                        if(pmt > 0) total = pmt * n;
-                        else if(target === 'pmt') total = res * n;
-                        else if(target === 'pv') total = pmt * n;
-                    }
-                    document.getElementById('f_res_total').innerText = 'Total Pago: ' + formatMoney(total);
-                } else { document.getElementById('f_res_total').innerText = 'Total Pago: R$ 0,00'; }
-            } catch (e) {}
-        }
-    };
-
-    /* --- EMPRESTIMO --- */
-    const emprestimo = {
-        limpar: () => {
-            document.getElementById('e_capital').value = '';
-            document.getElementById('e_n').value = '';
-            document.getElementById('e_taxa').value = '';
-            let nextM = new Date(); nextM.setDate(nextM.getDate() + 30);
-            document.getElementById('e_dt_primeira').value = formatDate(nextM);
-            document.querySelector('#e_tabela tbody').innerHTML = '';
-        },
-        gerar: () => {
-            const tbody = document.querySelector('#e_tabela tbody');
-            tbody.innerHTML = '';
-            const capital = parseMoney(document.getElementById('e_capital').value);
-            const n = parseInt(document.getElementById('e_n').value) || 0;
-            const taxa = parseFloatBr(document.getElementById('e_taxa').value) / 100;
-            const metodo = document.getElementById('e_metodo').value;
-            const dtCtr = new Date(); dtCtr.setHours(0,0,0,0);
-            let dtPriStr = document.getElementById('e_dt_primeira').value;
-            if (dtPriStr.length < 10) { alert('Data inválida'); return; }
-            const dtPri = parseDate(dtPriStr);
-            if (!capital || !n) return;
-            let saldo = capital;
-            const amortSAC = capital / n;
-            let idx = 1;
-            let refAnterior = new Date(dtCtr);
-            while (true) {
-                let limitDate = new Date(dtPri); limitDate.setDate(limitDate.getDate() - 5);
-                let proxMes = new Date(refAnterior);
-                if (refAnterior.getTime() === dtCtr.getTime()) {
-                    if (dtPri.getDate() >= dtCtr.getDate()) proxMes.setDate(dtPri.getDate());
-                    else { proxMes.setMonth(proxMes.getMonth() + 1); proxMes.setDate(dtPri.getDate()); }
-                } else proxMes.setMonth(proxMes.getMonth() + 1);
-                if (proxMes < limitDate && proxMes > refAnterior) {
-                    const diffTime = Math.abs(proxMes - refAnterior);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    const juros = saldo * (taxa / 30 * diffDays);
-                    emprestimo.addRow(idx, formatDate(proxMes), juros, 0, juros, saldo, true);
-                    idx++; refAnterior = new Date(proxMes);
-                } else break;
-            }
-            let currentDate = new Date(dtPri);
-            let diffDaysFinal = Math.ceil(Math.abs(currentDate - refAnterior) / (1000 * 60 * 60 * 24));
-            let taxaPrimeiraParcela = taxa;
-            if (diffDaysFinal > 35 || diffDaysFinal < 25) taxaPrimeiraParcela = (taxa / 30 * diffDaysFinal);
-            for (let i = 1; i <= n; i++) {
-                let juros = saldo * (i === 1 ? taxaPrimeiraParcela : taxa);
-                let amort = 0, prest = 0;
-                if (metodo === 'SAC') { amort = amortSAC; prest = amort + juros; } 
-                else {
-                    if (taxa > 0) prest = capital * (taxa * Math.pow(1 + taxa, n)) / (Math.pow(1 + taxa, n) - 1);
-                    else prest = capital / n;
-                    amort = prest - juros;
-                }
-                saldo -= amort; if (saldo < 0) saldo = 0;
-                emprestimo.addRow(idx, formatDate(currentDate), juros, amort, prest, saldo, false);
-                currentDate = addMonth(dtPri, i);
-                idx++;
-            }
-        },
-        addRow: (idx, data, juros, amort, prest, saldo, isCarencia) => {
-            const tbody = document.querySelector('#e_tabela tbody');
-            const tr = document.createElement('tr');
-            if (isCarencia) tr.classList.add('row-carencia');
-            tr.innerHTML = `<td><b>${idx}</b></td><td>${data}</td><td style="${isCarencia ? 'color:#D97706; font-weight:bold' : ''}">${formatMoney(juros)}</td><td>${formatMoney(amort)}</td><td>${formatMoney(prest)}</td><td>${formatMoney(saldo)}</td>`;
-            tbody.appendChild(tr);
-        }
-    };
-
-    /* --- INDICES --- */
-    const indices = {
-        limpar: () => {
-            document.getElementById('i_media').innerText = '...';
-            document.getElementById('i_acum').innerText = '...';
-            document.getElementById('i_max').innerText = '...';
-            document.querySelector('#i_tabela tbody').innerHTML = '';
-        },
-        buscar: async () => {
-            indices.limpar();
-            const btn = document.querySelector('#indices .btn-primary');
-            const originalText = btn.innerText;
-            btn.innerText = 'Buscando...'; btn.disabled = true;
-            const codigo = document.getElementById('i_indicador').value;
-            const nome = document.getElementById('i_indicador').options[document.getElementById('i_indicador').selectedIndex].text;
-            let meses = parseInt(document.getElementById('i_meses').value) || 12;
-            const hoje = new Date();
-            const dtIni = new Date(); dtIni.setDate(hoje.getDate() - (meses * 32));
-            const sIni = formatDate(dtIni); const sFim = formatDate(hoje);
-            const bcbUrl = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${codigo}/dados?formato=json&dataInicial=${sIni}&dataFinal=${sFim}`;
-            const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(bcbUrl)}`;
-            try {
-                const resp = await fetch(proxyUrl);
-                if (!resp.ok) throw new Error('Erro API');
-                const data = await resp.json();
-                indices.render(data.slice(-meses).reverse(), nome);
-            } catch (e) { alert('Erro conexão'); } 
-            finally { btn.innerText = originalText; btn.disabled = false; }
-        },
-        render: (dados, nome) => {
-            const isDolar = nome.includes('Dólar');
-            const simbolo = isDolar ? 'R$ ' : ''; const suffix = isDolar ? '' : '%';
-            const tbody = document.querySelector('#i_tabela tbody');
-            let vals = [];
-            dados.forEach(d => {
-                const val = parseFloat(d.valor); vals.push(val);
-                const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${d.data}</td><td style="text-align: right; font-weight: bold;">${simbolo}${val.toFixed(4).replace('.', ',')}${suffix}</td>`;
-                tbody.appendChild(tr);
-            });
-            if (vals.length > 0) {
-                const media = vals.reduce((a,b)=>a+b,0)/vals.length;
-                const maxVal = Math.max(...vals);
-                let acumStr = '';
-                if (isDolar) {
-                    const variacao = ((vals[0] - vals[vals.length-1]) / vals[vals.length-1]) * 100;
-                    acumStr = (variacao > 0 ? '+' : '') + variacao.toFixed(2).replace('.', ',') + '%';
+                if (tgt === 'pmt' && i && n) {
+                    // PMT = PV * [i * (1+i)^n] / [(1+i)^n - 1]
+                    res = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+                    resText = `Valor da Parcela: ${fmtMoney(res)}`;
+                    updateJurosResult(tgt, res, resText);
+                } else if (tgt === 'pv' && i && n) {
+                    // PV = PMT * [(1+i)^n - 1] / [i * (1+i)^n]
+                    res = pmt * (Math.pow(1 + i, n) - 1) / (i * Math.pow(1 + i, n));
+                    resText = `Valor que pode Financiar: ${fmtMoney(res)}`;
+                    updateJurosResult(tgt, res, resText);
+                } else if (tgt === 'i' && pv && n && pmt) {
+                    // Taxa (TIR Simplificada - como no Python)
+                    res = (Math.pow((pmt * n) / pv, 1 / n) - 1) * 100;
+                    resText = `Taxa Cobrada: ${fmtPercent(res)} % a.m.`;
+                    updateJurosResult(tgt, res, resText, true);
                 } else {
-                    let acum = 1.0; vals.forEach(v => acum *= (1 + v/100));
-                    acumStr = ((acum - 1) * 100).toFixed(2).replace('.', ',') + '%';
+                    document.getElementById('lbl_total').innerText = resText;
                 }
-                document.getElementById('i_media').innerText = simbolo + media.toFixed(4).replace('.', ',') + suffix;
-                document.getElementById('i_acum').innerText = acumStr;
-                document.getElementById('i_max').innerText = simbolo + maxVal.toFixed(4).replace('.', ',') + suffix;
-            }
-        }
-    };
-
-    /* --- CALCULADORA (CORRIGIDA: COPY & FORMAT) --- */
-    const calcBasic = {
-        displayCurrent: document.getElementById('calc-current'),
-        tape: document.getElementById('calc-tape'),
-        current: '0',
-        
-        formatDisplay: (valStr) => {
-            if(valStr === 'Erro') return 'Erro';
-            // Formata numeros separados por operadores
-            return valStr.replace(/([0-9,]+)/g, (match) => {
-                let parts = match.split(',');
-                // Formata milhar com ponto
-                let intPart = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ".");
-                let decPart = parts.length > 1 ? ',' + parts[1] : '';
-                return intPart + decPart;
-            });
-        },
-
-        update: () => {
-            calcBasic.displayCurrent.innerText = calcBasic.formatDisplay(calcBasic.current);
-        },
-        
-        append: (val) => {
-            // Visualmente usamos virgula, mas se for ponto, converte
-            let char = val === '.' ? ',' : val;
-            
-            if (char === ',') {
-                let parts = calcBasic.current.split(/[\+\-\*\/]/);
-                let lastNum = parts[parts.length-1];
-                if(lastNum.includes(',')) return;
-            }
-
-            if (calcBasic.current === '0' && char !== ',') calcBasic.current = char;
-            else calcBasic.current += char;
-            calcBasic.update();
-        },
-        
-        clear: () => {
-            if (calcBasic.current === '0') calcBasic.tape.innerHTML = '';
-            else {
-                calcBasic.current = '0';
-                calcBasic.update();
-            }
-        },
-        
-        backspace: () => {
-            calcBasic.current = calcBasic.current.slice(0, -1) || '0';
-            calcBasic.update();
-        },
-        
-        calculate: () => {
-            try {
-                let expression = calcBasic.current;
-                let evalExpr = expression.replace(/,/g, '.').replace(/×/g, '*').replace(/÷/g, '/');
-                let result = eval(evalExpr); 
-                if (!isFinite(result)) throw new Error();
-                // Formata resultado de volta para virgula
-                let resStr = String(result).replace('.', ',');
-                
-                let line = document.createElement('div');
-                line.className = 'calc-tape-row';
-                line.innerHTML = `<span>${calcBasic.formatDisplay(expression)}</span> = ${calcBasic.formatDisplay(resStr)}`;
-                calcBasic.tape.appendChild(line);
-                calcBasic.tape.scrollTop = calcBasic.tape.scrollHeight;
-                
-                calcBasic.current = resStr;
             } catch {
-                calcBasic.current = 'Erro';
+                document.getElementById('lbl_total').innerText = "Erro no Cálculo (Verifique os dados)";
             }
-            calcBasic.update();
-        },
+        }
         
-        copyToClipboard: () => {
-            // CORREÇÃO: Limpa formatação de milhar (pontos) antes de copiar
-            // Mantém apenas números e a virgula decimal
-            let rawTxt = calcBasic.displayCurrent.innerText;
-            // Remove pontos de milhar
-            let cleanTxt = rawTxt.replace(/\./g, '');
+        function updateJurosResult(tgt, res, resText, isPercent = false) {
+            const input = document.getElementById(jurosFields[tgt].input);
+            input.disabled = false;
+            let formattedValue;
+            if (isPercent) {
+                formattedValue = fmtPercent(res);
+            } else if (jurosFields[tgt].type === 'money') {
+                formattedValue = fmtMoney(res).replace('R$ ', '');
+            } else {
+                 formattedValue = res.toLocaleString('pt-BR');
+            }
             
-            navigator.clipboard.writeText(cleanTxt).then(() => {
-                let btn = document.querySelector('#calculadora .btn-secondary');
-                let orig = btn.innerHTML;
-                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
-                setTimeout(() => btn.innerHTML = orig, 1500);
+            input.value = formattedValue;
+            input.disabled = true;
+            document.getElementById('lbl_total').innerText = resText;
+        }
+
+        // --- TELA 3: EMPRÉSTIMO ---
+        
+        // Simulação da função add_month do Python
+        function addMonth(d, m) {
+            const newMonth = d.getMonth() + m;
+            const year = d.getFullYear() + Math.floor(newMonth / 12);
+            const month = (newMonth % 12); // 0-11
+            
+            const daysInMonth = [31, (year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0) ? 29 : 28), 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+            const day = Math.min(d.getDate(), daysInMonth[month]);
+
+            return new Date(year, month, day);
+        }
+
+        function gerarTabelaEmprestimo() {
+            const container = document.getElementById('tabela_emprestimo_container');
+            container.innerHTML = '<h3>Cronograma (Simulação)</h3><p style="color: var(--current-info-text);">Calculando...</p>';
+            document.getElementById('btn_export_emprestimo').disabled = true;
+            
+            const pv = parseVal(document.getElementById('emprestimo_pv').value);
+            const n = parseInt(document.getElementById('emprestimo_n').value) || 0;
+            const i = parseVal(document.getElementById('emprestimo_i').value) / 100;
+            const dtPriStr = document.getElementById('emprestimo_dt').value;
+            const met = document.getElementById('emprestimo_cmb').value;
+            
+            if (pv <= 0 || n <= 0 || i < 0) {
+                 container.innerHTML = '<h3>Cronograma (Simulação)</h3><p style="color: var(--color-danger);">Preencha o valor, parcelas e taxa corretamente.</p>';
+                 return;
+            }
+
+            let dtPri;
+            try { dtPri = new Date(dtPriStr.split('/').reverse().join('-')); }
+            catch { dtPri = addMonth(new Date(), 1); }
+
+            let saldo = pv;
+            const amortSac = pv / n;
+            let tableData = [];
+            let tableHTML = '<div class="table-container"><div class="table-header">';
+            const headers = ["#", "Data", "Juros", "Amortização", "Prestação", "Saldo Devedor"];
+            headers.forEach(h => tableHTML += `<div class="table-cell" style="flex: 1;">${h}</div>`);
+            tableHTML += '</div>';
+
+            let curr = dtPri;
+            let idx = 1;
+            let prestPrice = 0;
+            
+            if (met === 'PRICE') {
+                 if (i > 0) {
+                     prestPrice = pv * (i * Math.pow(1 + i, n)) / (Math.pow(1 + i, n) - 1);
+                 } else {
+                     prestPrice = pv / n;
+                 }
+            }
+
+            for (let k = 1; k <= n; k++) {
+                const jur = saldo * i;
+                let amort, prest;
+                
+                if (met === 'SAC') {
+                    amort = amortSac;
+                    prest = amort + jur;
+                } else { // PRICE
+                    prest = prestPrice;
+                    amort = prest - jur;
+                }
+                
+                saldo -= amort;
+                if (saldo < 0) saldo = 0;
+                
+                const dtFmt = `${String(curr.getDate()).padStart(2, '0')}/${String(curr.getMonth() + 1).padStart(2, '0')}/${curr.getFullYear()}`;
+
+                tableData.push({
+                    parc: k, data: dtFmt, juros: jur, amort: amort, prest: prest, saldo: saldo
+                });
+                
+                tableHTML += `<div class="table-row">
+                    <div class="table-cell" style="flex: 0.5;">${k}</div>
+                    <div class="table-cell" style="flex: 1.5;">${dtFmt}</div>
+                    <div class="table-cell">${fmtMoney(jur).replace('R$ ', '')}</div>
+                    <div class="table-cell">${fmtMoney(amort).replace('R$ ', '')}</div>
+                    <div class="table-cell">${fmtMoney(prest).replace('R$ ', '')}</div>
+                    <div class="table-cell">${fmtMoney(saldo).replace('R$ ', '')}</div>
+                </div>`;
+                
+                curr = addMonth(dtPri, k); // Avança k meses a partir da 1ª parcela
+            }
+            
+            tableHTML += '</div>';
+            container.innerHTML = '<h3>Cronograma (Simulação)</h3>' + tableHTML;
+            document.getElementById('btn_export_emprestimo').disabled = false;
+            currentEmprestimoData = tableData;
+        }
+
+        // --- TELA 4: ÍNDICES (COM CONSULTA BCB) ---
+
+        function updateIndicesLabels() {
+            const cmb = document.getElementById('indices_cmb');
+            const cod = cmb.value;
+            const name = INDICES_NOMES[cod];
+            
+            document.getElementById('lbl_desc').innerText = INDICES_DESCRICOES[cod];
+            document.getElementById('lbl_m').innerText = (name === "Dólar") ? "Últimos (dias):" : "Últimos (meses):";
+        }
+        
+        async function buscarIndices() {
+            const cmb = document.getElementById('indices_cmb');
+            const entM = document.getElementById('indices_m');
+            const btnBus = document.getElementById('btn_buscar_indices');
+            
+            btnBus.disabled = true;
+            btnBus.innerText = "Buscando...";
+            
+            const cod = cmb.value;
+            const m = parseInt(entM.value) || 12;
+            currentIndicesName = INDICES_NOMES[cod];
+            
+            let dataFinal = new Date();
+            let dataInicial = new Date();
+            let diasOffset = 0;
+
+            if (currentIndicesName === "Dólar") {
+                diasOffset = m;
+            } else {
+                diasOffset = m * 32; // Aproximação para meses
+            }
+            
+            dataInicial.setDate(dataFinal.getDate() - diasOffset);
+
+            const fmtDate = (date) => `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
+            const ini = fmtDate(dataInicial);
+            const hj = fmtDate(dataFinal);
+            
+            const url = `https://api.bcb.gov.br/dados/serie/bcdata.sgs.${cod}/dados?formato=json&dataInicial=${ini}&dataFinal=${hj}`;
+            
+            const container = document.getElementById('historico_indices_container');
+            container.innerHTML = '<h3>Histórico</h3><p style="color: var(--current-info-text);">Consultando BCB...</p>';
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                let dataRaw = await response.json();
+                
+                if (!dataRaw || dataRaw.length === 0) {
+                     alert("Nenhum dado encontrado no período especificado.");
+                     return;
+                }
+                
+                // Filtra e inverte (mais recente primeiro na tabela)
+                let data = dataRaw.slice(-m).reverse();
+                
+                // Lógica de cálculo (similar ao Python)
+                const vals = data.map(x => parseFloat(x.valor));
+                const med = vals.reduce((a, b) => a + b, 0) / vals.length;
+                const vMax = data.reduce((prev, curr) => (parseFloat(curr.valor) > parseFloat(prev.valor) ? curr : prev), data[0]);
+                const vMin = data.reduce((prev, curr) => (parseFloat(curr.valor) < parseFloat(prev.valor) ? curr : prev), data[0]);
+
+                let acum, s;
+                if (currentIndicesName === "Dólar") {
+                    if (vals.length < 2) acum = 0.0;
+                    else acum = ((vals[0] - vals[vals.length - 1]) / vals[vals.length - 1]) * 100;
+                    s = "R$";
+                } else {
+                    let ac = 1;
+                    vals.forEach(v => ac *= (1 + v / 100));
+                    acum = (ac - 1) * 100;
+                    s = "%";
+                }
+                
+                // Atualiza UI
+                updateIndicesUI(data, med, acum, s, vMax, vMin);
+
+            } catch (e) {
+                console.error("Erro na busca do BCB:", e);
+                container.innerHTML = `<h3>Histórico</h3><p style="color: var(--color-danger);">Falha na conexão com o BCB. Verifique o console ou tente novamente mais tarde. (Erro: ${e.message})</p>`;
+            } finally {
+                btnBus.disabled = false;
+                btnBus.innerText = "Buscar";
+            }
+        }
+
+        function updateIndicesUI(data, med, acum, s, vMax, vMin) {
+            currentIndicesData = data;
+            document.getElementById('btn_graph_indices').disabled = false;
+            document.getElementById('btn_export_indices').disabled = false;
+
+            document.querySelector('#card_media .indices-card-value').innerText = `${fmtPercent(med)} ${s}`;
+            document.querySelector('#card_acumulado .indices-card-value').innerText = `${fmtPercent(acum, 2)} %`;
+            
+            document.querySelector('#card_max .indices-card-value').innerText = `${fmtPercent(parseFloat(vMax.valor))} ${s}\n${vMax.data}`;
+            document.querySelector('#card_min .indices-card-value').innerText = `${fmtPercent(parseFloat(vMin.valor))} ${s}\n${vMin.data}`;
+
+            const container = document.getElementById('historico_indices_container');
+            let tableHTML = '<h3>Histórico</h3><div class="table-container">';
+            
+            // Tabela de Histórico
+            tableHTML += '<div class="table-header" style="justify-content: space-between;">';
+            tableHTML += `<div class="table-cell" style="flex: 1;">Data</div>`;
+            tableHTML += `<div class="table-cell" style="flex: 1;">Valor (${s})</div>`;
+            tableHTML += '</div>';
+
+            data.forEach((d, idx) => {
+                const bg = (idx % 2 === 0) ? 'var(--current-card-bg)' : 'var(--color-hover)';
+                tableHTML += `<div class="table-row" style="background-color: ${bg}; justify-content: space-between;">
+                    <div class="table-cell" style="flex: 1; text-align: left; padding-left: 10px;">${d.data}</div>
+                    <div class="table-cell" style="flex: 1; text-align: right; padding-right: 10px; font-weight: bold;">${fmtPercent(parseFloat(d.valor))}</div>
+                </div>`;
+            });
+
+            tableHTML += '</div>';
+            container.innerHTML = tableHTML;
+        }
+
+        // --- EXPORTAÇÃO (Simulada para HTML) ---
+        
+        function exportarTabela(type) {
+             const dataToExport = (type === 'emprestimo') ? currentEmprestimoData : currentIndicesData;
+             if (!dataToExport || dataToExport.length === 0) {
+                 alert("Nenhum dado para exportar.");
+                 return;
+             }
+             
+             // Cria um link de download simples para simular o CSV/Excel
+             let csvContent = "";
+             if (type === 'emprestimo') {
+                 csvContent = "Parcela,Data,Juros,Amortizacao,Prestacao,Saldo Devedor\n";
+                 dataToExport.forEach(row => {
+                     csvContent += `${row.parc},${row.data},${row.juros.toFixed(2)},${row.amort.toFixed(2)},${row.prest.toFixed(2)},${row.saldo.toFixed(2)}\n`;
+                 });
+             } else { // Indices
+                  csvContent = "Data,Valor\n";
+                  dataToExport.forEach(row => {
+                     csvContent += `${row.data},${row.valor}\n`;
+                 });
+             }
+             
+             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+             const link = document.createElement("a");
+             const url = URL.createObjectURL(blob);
+             link.setAttribute("href", url);
+             link.setAttribute("download", `${type}_export_${new Date().getTime()}.csv`);
+             link.style.visibility = 'hidden';
+             document.body.appendChild(link);
+             link.click();
+             document.body.removeChild(link);
+             alert(`Simulação de exportação concluída. Baixando arquivo ${type}.csv.`);
+        }
+        
+        // --- TELA 5: CALCULADORA (BÁSICA) ---
+
+        let calcBuffer = null;
+        let calcOp = null;
+        let currentString = "0";
+        let resetNext = false;
+        
+        function updateCalcDisplayTyping() { document.getElementById('calc_disp').innerText = currentString.replace('.', ','); }
+        function updateCalcDisplayResult(val) {
+            document.getElementById('calc_disp').innerText = fmtPercent(val, 2);
+            currentString = String(val).replace(',', '.');
+        }
+
+        function addCalcTape(text) {
+            const tape = document.getElementById('calc_tape');
+            const label = document.createElement('div');
+            label.innerText = text;
+            label.style.textAlign = 'right';
+            label.style.fontSize = '14px';
+            label.style.color = 'var(--current-info-text)';
+            tape.appendChild(label);
+            tape.scrollTop = tape.scrollHeight;
+        }
+
+        function calculateIntermediate() {
+            try {
+                const b = calcBuffer;
+                const c = parseVal(currentString.replace(',', '.'));
+                let res = 0;
+
+                if (calcOp === "+") res = b + c;
+                else if (calcOp === "-") res = b - c;
+                else if (calcOp === "*") res = b * c;
+                else if (calcOp === "/") res = c !== 0 ? b / c : 0;
+                
+                addCalcTape(`= ${fmtPercent(res, 2)}`);
+                updateCalcDisplayResult(res);
+                calcBuffer = res;
+                resetNext = true;
+            } catch {
+                document.getElementById('calc_disp').innerText = "Erro";
+                currentString = "0";
+            }
+        }
+
+        function calcClick(key) {
+             if ("0123456789".includes(key)) {
+                if (resetNext) { currentString = "0"; resetNext = false; }
+                if (currentString === "0") currentString = key;
+                else if (currentString.length < 15) currentString += key;
+                updateCalcDisplayTyping();
+            } else if (key === ",") {
+                if (resetNext) { currentString = "0."; resetNext = false; }
+                if (!currentString.includes('.')) currentString += '.';
+                updateCalcDisplayTyping();
+            } else if (key === "C") {
+                currentString = "0"; calcBuffer = null; calcOp = null; resetNext = false;
+                updateCalcDisplayResult(0);
+                document.getElementById('calc_tape').innerHTML = '';
+            } else if (key === "⌫") {
+                if (!resetNext) {
+                    currentString = currentString.slice(0, -1);
+                    if (!currentString || currentString === '.') currentString = "0";
+                    updateCalcDisplayTyping();
+                }
+            } else if ("+-*/".includes(key)) {
+                if (calcBuffer !== null && calcOp && !resetNext) calculateIntermediate();
+                calcBuffer = parseVal(currentString.replace(',', '.'));
+                calcOp = key;
+                resetNext = true;
+                addCalcTape(`${fmtPercent(calcBuffer, 2)} ${key}`);
+                updateCalcDisplayResult(calcBuffer);
+            } else if (key === "%") {
+                try {
+                    const currVal = parseVal(currentString.replace(',', '.'));
+                    let percRes;
+                    if (calcBuffer !== null && ["+", "-"].includes(calcOp)) {
+                         percRes = calcBuffer * (currVal / 100);
+                    } else {
+                         percRes = currVal / 100;
+                    }
+                    currentString = String(percRes).replace(',', '.');
+                    addCalcTape(`${fmtPercent(currVal, 2)}% (${fmtPercent(percRes, 2)})`);
+                    updateCalcDisplayResult(percRes);
+                    resetNext = true;
+                } catch { /* Ignora % se não houver buffer */ }
+            } else if (key === "=") {
+                if (calcBuffer !== null && calcOp) {
+                    calculateIntermediate();
+                    calcOp = null;
+                    calcBuffer = null;
+                }
+            }
+        }
+        
+        function copyResult() {
+            const raw = document.getElementById('calc_disp').innerText.replace('R$', '').replace(/\./g, '').replace(',', '.');
+            navigator.clipboard.writeText(raw).then(() => {
+                alert("Resultado copiado para a área de transferência!");
+            }).catch(err => {
+                alert('Falha ao copiar. O navegador pode exigir HTTPS.');
             });
         }
-    };
-
-    window.onload = () => {
-        let nextM = new Date(); nextM.setDate(nextM.getDate() + 30);
-        document.getElementById('e_dt_primeira').value = formatDate(nextM);
-        finan.updateState(); 
-    };
-</script>
+        
+    </script>
 </body>
 </html>
