@@ -1,5 +1,5 @@
 {
-  "name": "Cálculo Consciente",
+  "name": "Compra Consciente",
   "short_name": "Consultor",
   "start_url": "./index.html",
   "display": "standalone",
@@ -22,4 +22,5 @@
     }
   ]
 }
+
 
