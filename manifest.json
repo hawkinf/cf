@@ -1,13 +1,12 @@
 {
   "name": "Consultor Financeiro Pro",
-  "short_name": "Finanças Pro",
+  "short_name": "Consultor",
   "start_url": "./index.html",
   "display": "standalone",
-  "background_color": "#F4F6F9",
+  "background_color": "#F3F4F6",
   "theme_color": "#2563EB",
   "orientation": "portrait",
   "scope": "./",
-  "description": "Calculadora financeira completa: Juros, Empréstimos e Índices Econômicos.",
   "icons": [
     {
       "src": "icon-192.png",
