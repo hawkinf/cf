@@ -1,5 +1,5 @@
 {
-  "name": "Consultor Financeiro Pro",
+  "name": "Cálculo Consciente",
   "short_name": "Consultor",
   "start_url": "./index.html",
   "display": "standalone",
@@ -22,3 +22,4 @@
     }
   ]
 }
+
