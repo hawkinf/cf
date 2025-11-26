@@ -1,26 +1,24 @@
-const CACHE_NAME = 'financas-pro-v1';
-const ASSETS_TO_CACHE = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
-  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css'
+const CACHE_NAME = "consultor-financeiro-v4.7";
+const ASSETS = [
+  "./",
+  "./index.html",
+  "./manifest.json",
+  "./icon-192.png",
+  "./icon-512.png"
 ];
 
-// Instalação do Service Worker e Cache dos arquivos estáticos
-self.addEventListener('install', (event) => {
-  event.waitUntil(
+// Instalação: Cacheia os arquivos
+self.addEventListener("install", (e) => {
+  e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Caching assets');
-      return cache.addAll(ASSETS_TO_CACHE);
+      return cache.addAll(ASSETS);
     })
   );
 });
 
-// Ativação e limpeza de caches antigos
-self.addEventListener('activate', (event) => {
-  event.waitUntil(
+// Ativação: Limpa caches antigos se mudar a versão
+self.addEventListener("activate", (e) => {
+  e.waitUntil(
     caches.keys().then((keyList) => {
       return Promise.all(
         keyList.map((key) => {
@@ -33,18 +31,11 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Interceptação de requisições
-self.addEventListener('fetch', (event) => {
-  // Não fazer cache de chamadas para APIs externas (para ter dados sempre frescos)
-  if (event.request.url.includes('api.allorigins.win') || event.request.url.includes('api.bcb.gov.br')) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
-
-  // Estratégia: Cache First, falling back to Network (Offline First)
-  event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
+// Fetch: Tenta servir do cache, se não der, baixa da rede
+self.addEventListener("fetch", (e) => {
+  e.respondWith(
+    caches.match(e.request).then((response) => {
+      return response || fetch(e.request);
     })
   );
 });
