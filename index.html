@@ -32,9 +32,11 @@
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
+          // Initialize the Flutter engine
           engineInitializer.initializeEngine({
-             // Força renderizador HTML para evitar problemas de CORS/Fontes em alguns servidores
-             renderer: "html"
+            // FORÇA O MODO HTML: Resolve problemas de tela branca em muitos servidores
+            // e torna o app mais leve para carregar inicialmente.
+            renderer: "html"
           }).then(function(appRunner) {
             appRunner.runApp();
           });
