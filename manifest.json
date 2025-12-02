@@ -1,7 +1,7 @@
 {
   "name": "Consultor Financeiro",
   "short_name": "Consultor",
-  "start_url": "/cf/",
+  "start_url": ".",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2196F3",
