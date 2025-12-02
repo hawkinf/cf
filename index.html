@@ -32,12 +32,10 @@
           serviceWorkerVersion: serviceWorkerVersion,
         },
         onEntrypointLoaded: function(engineInitializer) {
-          // Initialize the Flutter engine
           engineInitializer.initializeEngine({
-            // Força o renderizador HTML para máxima compatibilidade se necessário
-            renderer: "html" 
+             // Força renderizador HTML para evitar problemas de CORS/Fontes em alguns servidores
+             renderer: "html"
           }).then(function(appRunner) {
-            // Run the app
             appRunner.runApp();
           });
         }
